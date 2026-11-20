@@ -1,0 +1,50 @@
+[
+  {
+    "name": "joy-stack",
+    "category": "engineering",
+    "path": "skills/engineering/joy-stack",
+    "summary": "默认工程工作流底座，自动协调理解、定形、构建、验证、排障、评审与续接"
+  },
+  {
+    "name": "joy-understand",
+    "category": "engineering",
+    "path": "skills/engineering/joy-understand",
+    "summary": "还原系统当前行为、历史原因与影响范围，区分事实、推断和未知项"
+  },
+  {
+    "name": "joy-shape",
+    "category": "engineering",
+    "path": "skills/engineering/joy-shape",
+    "summary": "将模糊目标收敛为最小结果、边界、验收条件和待决定项"
+  },
+  {
+    "name": "joy-build",
+    "category": "engineering",
+    "path": "skills/engineering/joy-build",
+    "summary": "以最小可反馈的纵向切片实现功能、重构或已定位修复"
+  },
+  {
+    "name": "joy-verify",
+    "category": "engineering",
+    "path": "skills/engineering/joy-verify",
+    "summary": "建立相称验证证据，区分测试、构建、部署与真实业务验收"
+  },
+  {
+    "name": "joy-debug",
+    "category": "engineering",
+    "path": "skills/engineering/joy-debug",
+    "summary": "复现、缩小并定位异常根因，形成可验证的回归保护"
+  },
+  {
+    "name": "joy-review",
+    "category": "engineering",
+    "path": "skills/engineering/joy-review",
+    "summary": "按原目标与系统契约独立检查变更的正确性和可维护性"
+  },
+  {
+    "name": "joy-continue",
+    "category": "engineering",
+    "path": "skills/engineering/joy-continue",
+    "summary": "将经确认的工程状态整理为可续接、可审查的交接信息"
+  }
+]
