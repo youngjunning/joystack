@@ -17,9 +17,10 @@ JoyStack 是一套可组合的工程能力，而不是一篇流程说明。用�
 - 需要证明交付是否真的成立：[`joy-verify`](../joy-verify/SKILL.md)；
 - 复现、定位和修复异常：[`joy-debug`](../joy-debug/SKILL.md)；
 - 在合入或交付前检查遗漏：[`joy-review`](../joy-review/SKILL.md)；
+- 在 Git 仓库安全提交、推送或收尾：[`joy-git`](../joy-git/SKILL.md)；
 - 跨轮续接、交接或保留经确认的判断：[`joy-continue`](../joy-continue/SKILL.md)。
 
-现有领域 Skill 优先主导自身职责，例如产品架构、UI、测试质量、Git、写作或目标平台操作。JoyStack 只在它们之间维持同一个目标、边界与证据标准。
+现有领域 Skill 优先主导自身职责，例如产品架构、UI、测试质量、写作或目标平台操作。JoyStack 只在它们之间维持同一个目标、边界与证据标准；`joy-git` 只在项目规则与验证证据已明确时负责 Git 交付，不接管发布权限。
 
 ## 统一交付契约
 

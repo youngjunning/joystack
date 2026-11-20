@@ -42,6 +42,12 @@
     "summary": "按原目标与系统契约独立检查变更的正确性和可维护性"
   },
   {
+    "name": "joy-git",
+    "category": "engineering",
+    "path": "skills/engineering/joy-git",
+    "summary": "为仓库改动选择安全的提交、推送或保留路径，并回读交付状态"
+  },
+  {
     "name": "joy-continue",
     "category": "engineering",
     "path": "skills/engineering/joy-continue",
