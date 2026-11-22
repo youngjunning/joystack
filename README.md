@@ -24,7 +24,7 @@ npx skills add youngjunning/joystack
 | 合入或发布前独立检查 | [Review](skills/engineering/joy-review/SKILL.md) |
 | 实质行为改动需要独立评审、修正和复验到可信终态 | [Loop](skills/engineering/joy-loop/SKILL.md) |
 | 阶段性治理文档、测试、规则、分支与 worktree | [Govern](skills/engineering/joy-govern/SKILL.md) |
-| 需要隔离并安全提交、推送或生成可链接的逐仓库收尾事实 | [Git Delivery](skills/engineering/joy-git/SKILL.md) |
+| 需要安全提交、推送，或通过分支/PR 合入并生成可链接的逐仓库收尾事实 | [Git Delivery](skills/engineering/joy-git/SKILL.md) |
 | 跨轮继续或交接 | [Continue](skills/engineering/joy-continue/SKILL.md) |
 
 [JoyStack 入口](skills/engineering/joy-stack/SKILL.md) 统一这些能力，定义最小任务契约和按风险升级的规则。[套件契约](skills/engineering/joy-stack/references/stack-contract.md) 让未来更好的开发套件可以替换或补强单个模块，不锁定某个模型、运行时或平台。

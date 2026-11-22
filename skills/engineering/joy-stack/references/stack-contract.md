@@ -24,10 +24,10 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 | Review | 变更与原目标 | 范围/契约/维护性问题及证据 |
 | Loop | 已初步验证的任务 diff、独立评审结论与轮次预算 | finding ledger、最新验证证据，以及当前 diff 的 APPROVE 或有证据的 BLOCKED |
 | Govern | 仓库文档、测试、规则与 Git 卫生事实 | 分级治理清单、确定性检查候选、分支/worktree 看板与安全处置条件 |
-| Git Delivery | 任务改动、验证证据与项目交付规则 | 直接或隔离的 Git 交付结果、可链接的逐仓库提交/远端证据与保留事项 |
+| Git Delivery | 任务改动、验证证据与项目交付规则 | 直接或分支/PR 的 Git 交付结果、可链接的提交/远端/PR 证据与保留事项 |
 | Continue | 已确认状态 | 可续接摘要、仍有效的决定与下一步条件 |
 
-`Loop` 是组合控制能力，不重复其他模块的专业判断：`Review` 定义 finding，`Build` 完成经核实的最小修正，`Verify` 更新证据，`Loop` 只维护轮次、ledger 与停止条件。一次只读评审可以直接使用 `Review`；需要作者修正并复验到可信终态时进入 `Loop`；通过后再由 `Git Delivery` 处理提交和推送。
+`Loop` 是组合控制能力，不重复其他模块的专业判断：`Review` 定义 finding，`Build` 完成经核实的最小修正，`Verify` 更新证据，`Loop` 只维护轮次、ledger 与停止条件。一次只读评审可以直接使用 `Review`；需要作者修正并复验到可信终态时进入 `Loop`；通过后再由 `Git Delivery` 按项目规则选择直接提交推送或分支/PR 合入。
 
 ## 融合后续套件
 

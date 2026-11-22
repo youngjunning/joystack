@@ -30,4 +30,4 @@ reviewer 不可用、超时或失败都不算通过。同一问题经过两次�
 - **APPROVE：** 独立 reviewer 明确批准当前 diff，没有开放的 `blocker` 或 `should`，且最新行为改动已有相称验证。
 - **BLOCKED：** 输出最小待决问题、双方证据、已执行验证和恢复条件；预算耗尽不能写成通过。
 
-交回轮数、已解决和已驳回 finding、最新验证证据与终态。APPROVE 后由 [`joy-git`](../joy-git/SKILL.md) 按项目授权交付；Loop 不创建 PR、不管理分支、不提交、不推送，也不把测试、构建、部署或真实业务结果互相替代。共享接口见[套件契约](../joy-stack/references/stack-contract.md)。
+交回轮数、已解决和已驳回 finding、最新验证证据与终态。APPROVE 后由 [`joy-git`](../joy-git/SKILL.md) 按项目授权选择直接交付或分支/PR 流程；Loop 本身只维护复查闭环，不接管 Git 交付，也不把测试、构建、部署或真实业务结果互相替代。共享接口见[套件契约](../joy-stack/references/stack-contract.md)。
