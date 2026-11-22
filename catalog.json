@@ -45,7 +45,7 @@
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",
-    "summary": "为仓库改动选择直接或隔离的安全交付路径，并回读提交、推送和清理状态"
+    "summary": "为仓库改动选择直接或隔离的安全交付路径，并提供可链接的逐仓库交付事实"
   },
   {
     "name": "joy-continue",
