@@ -1,6 +1,9 @@
 ---
 name: joy-understand
 description: 在改动前还原代码、产品行为或历史决策的当前事实；用于不清楚系统如何工作、为何如此或影响范围多大时。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Understand

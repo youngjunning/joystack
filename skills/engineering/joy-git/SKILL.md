@@ -1,6 +1,9 @@
 ---
 name: joy-git
 description: 在 Git 仓库任务完成时确定任务改动能否安全提交和推送，并执行获准的交付；不用于只读问答、评审或无改动诊断。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Git Delivery

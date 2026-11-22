@@ -1,6 +1,9 @@
 ---
 name: joy-verify
 description: 为工程交付建立相称证据并报告尚未覆盖的边界；用于测试、构建、部署、目标设备或真实业务验收。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Verify

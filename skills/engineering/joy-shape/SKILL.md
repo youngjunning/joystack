@@ -1,6 +1,9 @@
 ---
 name: joy-shape
 description: 将模糊需求收敛成可实施、可验收的最小结果与系统边界；用于目标、术语、取舍或成功条件尚未明确时。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Shape

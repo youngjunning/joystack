@@ -1,6 +1,9 @@
 ---
 name: joy-build
 description: 将已澄清的工程目标实现为最小、可反馈的纵向切片；用于功能、重构或已定位修复的实施阶段。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Build

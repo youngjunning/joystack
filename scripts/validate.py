@@ -35,6 +35,12 @@ def validate():
             errors.append(f'frontmatter name mismatch: {path}')
         if not front or not re.search(r'^description:\s*\S', front[1], re.M):
             errors.append(f'missing description: {path}')
+        metadata = re.search(r'^metadata:\s*\n((?:[ \t]+[^\n]*\n?)*)', front[1], re.M) if front else None
+        metadata_text = metadata.group(1) if metadata else ''
+        if not re.search(r'^  author:\s*杨俊宁\s*$', metadata_text, re.M):
+            errors.append(f'missing or invalid author metadata: {path}')
+        if not re.search(r'^  email:\s*luozhu2021@gmail\.com\s*$', metadata_text, re.M):
+            errors.append(f'missing or invalid author email: {path}')
         for target in re.findall(r'\]\(([^\s)]+)\)', text):
             if target.startswith(('#', '/', '~')) or '://' in target:
                 continue

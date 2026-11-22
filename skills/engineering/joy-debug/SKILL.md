@@ -1,6 +1,9 @@
 ---
 name: joy-debug
 description: 系统化复现、缩小并定位异常根因，形成回归保护；用于故障、性能回退或验证不符合预期时。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Debug

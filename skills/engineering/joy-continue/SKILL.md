@@ -1,6 +1,9 @@
 ---
 name: joy-continue
 description: 将经确认的工程状态压缩为可续接、可审查的交接信息；用于跨轮继续、暂停、移交或复盘。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Continue

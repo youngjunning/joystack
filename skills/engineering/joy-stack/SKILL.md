@@ -1,6 +1,9 @@
 ---
 name: joy-stack
 description: 默认工程工作流底座：遇到跨边界、模糊、需要验证或需要续接的产品与工程任务时自动协调理解、定形、构建、验证、排障、评审与续接能力。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack

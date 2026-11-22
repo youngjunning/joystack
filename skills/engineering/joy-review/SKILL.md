@@ -1,6 +1,9 @@
 ---
 name: joy-review
 description: 独立检查变更是否符合原目标、系统契约与可维护性要求；用于合入、发布或重要交付前的评审。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Review

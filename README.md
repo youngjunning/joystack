@@ -34,6 +34,7 @@ python3 scripts/validate.py
 ```
 
 贡献者应维持模块之间明确的输入、输出与权限边界；不要把一个套件的专有运行时、模型路由或流程文本直接迁入 JoyStack。
+每个模块的 `SKILL.md` frontmatter 必须保留作者 `杨俊宁` 与联系邮箱 `luozhu2021@gmail.com`；仓库校验会检查这两个字段。
 
 ## 许可
 
