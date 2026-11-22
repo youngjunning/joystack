@@ -42,6 +42,12 @@
     "summary": "按原目标与系统契约独立检查变更的正确性和可维护性"
   },
   {
+    "name": "joy-govern",
+    "category": "engineering",
+    "path": "skills/engineering/joy-govern",
+    "summary": "依据仓库事实治理文档、测试分层、确定性检查、分支与 worktree 卫生"
+  },
+  {
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",

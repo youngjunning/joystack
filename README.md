@@ -22,6 +22,7 @@ npx skills add youngjunning/joystack
 | 需要证明结果是否成立 | [Verify](skills/engineering/joy-verify/SKILL.md) |
 | 出现异常或回归 | [Debug](skills/engineering/joy-debug/SKILL.md) |
 | 合入或发布前独立检查 | [Review](skills/engineering/joy-review/SKILL.md) |
+| 阶段性治理文档、测试、规则、分支与 worktree | [Govern](skills/engineering/joy-govern/SKILL.md) |
 | 需要隔离并安全提交、推送或生成可链接的逐仓库收尾事实 | [Git Delivery](skills/engineering/joy-git/SKILL.md) |
 | 跨轮继续或交接 | [Continue](skills/engineering/joy-continue/SKILL.md) |
 
@@ -34,8 +35,10 @@ python3 scripts/validate.py
 ```
 
 贡献者应维持模块之间明确的输入、输出与权限边界；不要把一个套件的专有运行时、模型路由或流程文本直接迁入 JoyStack。
+
+2026-11-22，JoyStack 从 [oil-oil/oil-dev-skills](https://github.com/oil-oil/oil-dev-skills) `9bcd900`（MIT）吸收了分级探索与规划、宿主中立委托契约、风险分级审查、根因修复和仓库治理方法；具体映射与未引入边界见[融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。
 每个模块的 `SKILL.md` frontmatter 必须保留作者 `杨俊宁` 与联系邮箱 `luozhu2021@gmail.com`；仓库校验会检查这两个字段。
 
 ## 许可
 
-MIT。JoyStack 是独立实现；Matt Pocock 的 Skills 和 pstack 仅作为公开工程思想的参考，不包含其文本、脚本、资产或运行时。
+MIT。JoyStack 是独立实现；Matt Pocock 的 Skills、pstack 与 oil dev skills 仅作为公开工程思想的参考，不包含其脚本、资产、个人配置或运行时。各上游方法与原始实现仍归其作者所有。
