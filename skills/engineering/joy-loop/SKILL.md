@@ -1,0 +1,33 @@
+---
+name: joy-loop
+description: 在实质行为改动完成初步验证后，协调独立 joy-review、作者修正与 joy-verify 在有限轮次内闭环；输出当前 diff 的 APPROVE 或有证据的 BLOCKED。纯文案、格式和机械改名不触发。
+metadata:
+  author: 杨俊宁
+  email: luozhu2021@gmail.com
+---
+
+# JoyStack · Loop
+
+把已经实现并取得初步证据的工程改动推进到可信终态：独立评审发现真实问题，作者核实并做最小修正，验证模块更新证据，再只针对开放问题和新增 diff 复查。Loop 只控制轮次、状态和停止条件；评审标准、实现、验证与 Git 交付分别由对应模块负责。
+
+## 进入条件
+
+输入至少包含用户目标、任务边界、当前任务 diff 和已经执行的验证。当改动影响运行行为、公共接口、权限、数据、状态、并发、构建或发布结果时自动进入；用户也可以显式要求复查闭环。纯文案、格式、注释或机械改名已有充分检查时直接交付，不额外启动循环。
+
+只纳入本任务改动。读取项目约定和工作区状态，保留并行改动；无法可靠区分任务 diff 时停止并报告边界，不让 reviewer 猜测范围。
+
+## 有限闭环
+
+1. **独立评审。** 在与实现上下文隔离的 reviewer 中执行 [`joy-review`](../joy-review/SKILL.md)。提供用户目标、范围外事项、任务 diff、必要上下文和验证证据；reviewer 只返回 finding 和 APPROVE/CHANGES，不编辑文件、不执行 Git 交付，也不启动新的 reviewer。
+2. **核实与修正。** 维护稳定 ID 的 finding ledger，严重度沿用 `blocker`、`should`、`nit`。作者逐项核实：成立的问题在当前 Loop 内交给 [`joy-build`](../joy-build/SKILL.md) 做最小修正，并把新 diff 交回同一个 Loop；不成立、范围外或纯偏好的 finding 用文件位置、测试或复现结果记录反证。
+3. **更新证据。** 每轮行为修正后在当前 Loop 内执行 [`joy-verify`](../joy-verify/SKILL.md)，至少重跑受影响检查，并把证据交回同一个 Loop；没有覆盖当前 diff 的旧验证不能作为通过证据。
+4. **收敛。** 默认最多 3 轮。只有安全、权限、认证、数据丢失、状态或并发风险仍有新证据时，最多延长到 5 轮。后续轮次只复查开放的 `blocker`/`should` 和新增 diff；已结束的 reviewer 才能被替换或重试。
+
+reviewer 不可用、超时或失败都不算通过。同一问题经过两次有证据的回应仍有分歧，或轮次预算耗尽时，保留双方证据并结束为 `BLOCKED`。
+
+## 终态与交接
+
+- **APPROVE：** 独立 reviewer 明确批准当前 diff，没有开放的 `blocker` 或 `should`，且最新行为改动已有相称验证。
+- **BLOCKED：** 输出最小待决问题、双方证据、已执行验证和恢复条件；预算耗尽不能写成通过。
+
+交回轮数、已解决和已驳回 finding、最新验证证据与终态。APPROVE 后由 [`joy-git`](../joy-git/SKILL.md) 按项目授权交付；Loop 不创建 PR、不管理分支、不提交、不推送，也不把测试、构建、部署或真实业务结果互相替代。共享接口见[套件契约](../joy-stack/references/stack-contract.md)。

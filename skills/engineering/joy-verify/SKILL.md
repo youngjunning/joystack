@@ -14,4 +14,4 @@ metadata:
 
 把证据分层记录：静态检查、单元/集成测试、构建、部署、页面/设备、外部服务和真实业务结果。前一层通过不等于后一层已经确认；无法执行时说明缺少的环境、权限或输入，不把它写成成功。
 
-当验证暴露异常，提供复现事实并交给 [`joy-debug`](../joy-debug/SKILL.md)。当验证充分后，可交给 [`joy-review`](../joy-review/SKILL.md) 检查范围遗漏，再依项目规则交付。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。
+当验证暴露异常，提供复现事实并交给 [`joy-debug`](../joy-debug/SKILL.md)。由活动中的 [`joy-loop`](../joy-loop/SKILL.md) 调用时，把新证据交回同一个 Loop，不启动嵌套循环。其他验证充分的改动，一次只读评审交给 [`joy-review`](../joy-review/SKILL.md)；实质行为改动需要作者修正并复验到可信终态时进入 `joy-loop`。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。

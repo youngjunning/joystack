@@ -3,7 +3,7 @@
     "name": "joy-stack",
     "category": "engineering",
     "path": "skills/engineering/joy-stack",
-    "summary": "默认工程工作流底座，自动协调理解、定形、构建、验证、排障、评审与续接"
+    "summary": "默认工程工作流底座，自动协调理解、定形、构建、验证、排障、复查闭环与交付"
   },
   {
     "name": "joy-understand",
@@ -40,6 +40,12 @@
     "category": "engineering",
     "path": "skills/engineering/joy-review",
     "summary": "按原目标与系统契约独立检查变更的正确性和可维护性"
+  },
+  {
+    "name": "joy-loop",
+    "category": "engineering",
+    "path": "skills/engineering/joy-loop",
+    "summary": "协调独立评审、最小修正与复验，在有限轮次内形成 APPROVE 或有证据的 BLOCKED"
   },
   {
     "name": "joy-govern",

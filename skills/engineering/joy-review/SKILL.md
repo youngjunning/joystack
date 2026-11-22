@@ -18,4 +18,4 @@ metadata:
 
 结论按 blocker、should、nit 分级；只有 blocker 与 should 影响通过。修正后只复查开放问题和新增 diff，除非改动已越出原审查基线。高频且跨模块的重复问题优先变成项目内确定性检查，偶发问题不追加常驻规则。
 
-发现未验证的关键主张交给 [`joy-verify`](../joy-verify/SKILL.md)；发现机制不明的缺陷交给 [`joy-debug`](../joy-debug/SKILL.md)。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。
+发现未验证的关键主张交给 [`joy-verify`](../joy-verify/SKILL.md)；发现机制不明的缺陷交给 [`joy-debug`](../joy-debug/SKILL.md)。当调用方使用 [`joy-loop`](../joy-loop/SKILL.md) 时，本模块只返回 finding 与结论，不自行启动循环；finding ledger、作者修正、复验和再次评审由调用方的 Loop 维护。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。

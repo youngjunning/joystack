@@ -16,4 +16,4 @@ metadata:
 
 编码过程中只运行能快速缩短反馈的关联检查；高耗时全量、端到端、打包或目标设备门禁在一批改动完成后集中执行。多个互不依赖的任务只有在热点文件不重叠时才并行，并按项目规则隔离工作区；不要让执行者的改动与不属于本任务的脏状态混在一起。
 
-实现中发现目标不成立、事实变化或风险超出契约时回到 [`joy-understand`](../joy-understand/SKILL.md) 或 [`joy-shape`](../joy-shape/SKILL.md)，而非继续堆叠补丁。完成后交给 [`joy-verify`](../joy-verify/SKILL.md)，需要独立检查时再交给 [`joy-review`](../joy-review/SKILL.md)。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。
+实现中发现目标不成立、事实变化或风险超出契约时回到 [`joy-understand`](../joy-understand/SKILL.md) 或 [`joy-shape`](../joy-shape/SKILL.md)，而非继续堆叠补丁。完成后交给 [`joy-verify`](../joy-verify/SKILL.md)；由活动中的 [`joy-loop`](../joy-loop/SKILL.md) 调用时，把新 diff 交回同一个 Loop，不启动嵌套循环。其他实质行为改动需要独立评审、修正与复验闭环时进入 `joy-loop`，一次只读评审仍可直接使用 [`joy-review`](../joy-review/SKILL.md)。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。
