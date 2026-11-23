@@ -53,9 +53,13 @@ python3 -m unittest discover -s skills/engineering/joy-git/scripts -p 'test_*.py
 
 贡献者应维持模块之间明确的输入、输出与权限边界；不要把一个套件的专有运行时、模型路由或流程文本直接迁入 JoyStack。
 
-2026-11-22，JoyStack 从 [oil-oil/oil-dev-skills](https://github.com/oil-oil/oil-dev-skills) `9bcd900`（MIT）吸收了分级探索与规划、宿主中立委托契约、风险分级审查、根因修复和仓库治理方法；具体映射与未引入边界见[融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。`joy-loop` 改编自 [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a) 的 `sol-loop`（MIT），固定来源与改编边界见模块内 [NOTICE](skills/engineering/joy-loop/NOTICE.md)。
-每个模块的 `SKILL.md` frontmatter 必须保留作者 `杨俊宁` 与联系邮箱 `luozhu2021@gmail.com`；仓库校验会检查这两个字段。
+模块的 `SKILL.md` frontmatter 保留作者 `杨俊宁` 与联系邮箱 `luozhu2021@gmail.com`，由仓库校验检查。
 
-## 许可
+## 来源与许可
 
-MIT。JoyStack 是独立实现；Matt Pocock 的 Skills、pstack 与 oil dev skills 仅作为公开工程思想的参考，不包含其脚本、资产、个人配置或运行时。`joy-loop` 保留 `sol-loop` 的 MIT 许可与来源说明。各上游方法与原始实现仍归其作者所有。
+JoyStack 采用 [MIT License](LICENSE)。参考与改编的来源分别说明如下：
+
+- **工程方法参考**：Matt Pocock 的 Skills、pstack 和 [oil dev skills](https://github.com/oil-oil/oil-dev-skills)。其中，oil dev skills 的能力映射、参考版本与取舍见[融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。
+- **模块改编**：`joy-loop` 改编自 [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a) 的 `sol-loop`，保留[上游 MIT 许可](skills/engineering/joy-loop/LICENSE)；原作者、固定版本与改编范围见 [NOTICE](skills/engineering/joy-loop/NOTICE.md)。
+
+这些来源不是运行依赖，无需安装上游套件即可使用 JoyStack。
