@@ -139,7 +139,7 @@ When changing capabilities, update the module contracts, catalog, and both READM
 
 JoyStack is distributed under the [MIT License](LICENSE).
 
-- Engineering-method references include Matt Pocock's Skills, pstack, and [oil dev skills](https://github.com/oil-oil/oil-dev-skills). The latter's capability mapping, pinned version, and design choices are documented in the [integration record](skills/engineering/joy-stack/references/oil-dev-integration.md).
+- Engineering-method references include Matt Pocock's Skills, pstack, and [oil dev skills](https://github.com/oil-oil/oil-dev-skills). Oil dev skills is a method source only: it is not installed, invoked, or used as an optional execution implementation. JoyStack and the host's existing tools provide the capabilities. The mapping, pinned version, and attribution are documented in the [integration record](skills/engineering/joy-stack/references/oil-dev-integration.md).
 - `joy-loop` is adapted from `sol-loop` in [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a), retains the [upstream MIT license](skills/engineering/joy-loop/LICENSE), and documents its original author and adaptation scope in [NOTICE](skills/engineering/joy-loop/NOTICE.md).
 
 These references are not runtime dependencies. JoyStack can be used without installing the upstream suites.

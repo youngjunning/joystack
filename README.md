@@ -139,7 +139,7 @@ python3 -m unittest discover -s skills/engineering/joy-git/scripts -p 'test_*.py
 
 JoyStack 采用 [MIT License](LICENSE)。
 
-- 工程方法参考包括 Matt Pocock 的 Skills、pstack 和 [oil dev skills](https://github.com/oil-oil/oil-dev-skills)；后者的能力映射、固定版本与取舍见[融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。
+- 工程方法参考包括 Matt Pocock 的 Skills、pstack 和 [oil dev skills](https://github.com/oil-oil/oil-dev-skills)。oil dev skills 只作方法来源，不安装、调用或作为可选执行实现；能力由 JoyStack 自身与宿主现有工具提供。能力映射、固定版本与归属见[融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。
 - `joy-loop` 改编自 [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a) 的 `sol-loop`，保留[上游 MIT 许可](skills/engineering/joy-loop/LICENSE)；原作者与改编范围见 [NOTICE](skills/engineering/joy-loop/NOTICE.md)。
 
 这些来源不是运行依赖，无需安装上游套件即可使用 JoyStack。
