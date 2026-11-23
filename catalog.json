@@ -6,6 +6,12 @@
     "summary": "宿主中立的工程工作流底座，按技能名协调理解、构建、验证、复查闭环与交付"
   },
   {
+    "name": "joy-token",
+    "category": "engineering",
+    "path": "skills/engineering/joy-token",
+    "summary": "全程减少冗余上下文、工具输出与重复调用，保留指定模型、权限、验收和可核验计量边界"
+  },
+  {
     "name": "joy-understand",
     "category": "engineering",
     "path": "skills/engineering/joy-understand",

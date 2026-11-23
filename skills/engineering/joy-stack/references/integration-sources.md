@@ -10,6 +10,7 @@
 | pstack | Lauren Tan（poteto） | [pstack 融合记录](pstack-integration.md) | 初期工程方法参考；与 Matt/tstack 分开，最初上游 SHA 未记录 |
 | tstack | Theo Browne | [tstack 融合记录](tstack-integration.md) | joy-loop 实质改编已有 LICENSE/NOTICE；九个 Skill 的局部方法映射与契约验收另列 |
 | oil dev skills | oil-oil/oil-dev-skills 维护者 | [oil dev skills 融合记录](oil-dev-integration.md) | 六类方法已独立表述；只作来源，不安装、调用或作为可选执行/降级依赖 |
+| codex-token-skills | lokikill123/codex-token-skills 维护者 | [Token 来源与适配记录](https://github.com/youngjunning/joystack/blob/main/skills/engineering/joy-token/references/sources.md) | 固定快照的方法参考，独立表述为 joy-token；不引入上游运行流程，不采用其节省比例或取消验证规则 |
 
 新增记录不表示新增能力或安装上游。上游版本为每次实际核对所得，未知的最初版本保持未知；重新融合前核对原始内容、许可证、差异和真实目标任务，不自动同步上游变更。安装了其它独立专业 Skills，也不改变 JoyStack 基础能力不依赖这些来源套件的事实。
 

@@ -41,6 +41,7 @@ The agent selects from the Skills available in its host. Missing modules, tools,
 | Module | When to use it | Main result |
 | --- | --- | --- |
 | [joy-stack](skills/engineering/joy-stack/SKILL.md) | Work crosses boundaries, is underspecified, or needs verification and continuation | Selects necessary modules and keeps a shared task boundary |
+| [joy-token](skills/engineering/joy-token/SKILL.md) | Token-efficient execution, oversized context, repeated calls, or an explicit savings request | Targeted reads and compact tool output without changing the chosen model or quality gates |
 | [joy-understand](skills/engineering/joy-understand/SKILL.md) | Behavior, causes, or impact are unclear | Current facts, sources, inferences, and unknowns |
 | [joy-shape](skills/engineering/joy-shape/SKILL.md) | Scope, tradeoffs, or acceptance criteria are unresolved | An implementable goal, boundaries, and acceptance criteria |
 | [joy-build](skills/engineering/joy-build/SKILL.md) | The implementation goal is clear | A small, feedback-ready change with local verification |
@@ -97,7 +98,7 @@ From the original project directory, update the existing JoyStack modules:
 
 ```bash
 npx skills update -p joy-stack joy-understand joy-shape joy-build \
-  joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue
+  joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue joy-token
 ```
 
 For a global installation, use the same command with `-g` instead of `-p`. Naming the modules avoids updating unrelated suites. This updates installed, CLI-tracked modules in the selected scope. To add modules introduced upstream, rerun `skills add` in the appropriate scope and select the complete module set. Refer to the [CLI documentation](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) and `npx skills --help` for available options.
@@ -142,5 +143,6 @@ JoyStack is distributed under the [MIT License](LICENSE).
 - Engineering-method sources have separate records: [Matt Pocock Skills](skills/engineering/joy-stack/references/matt-pocock-integration.md), [Lauren Tan's pstack](skills/engineering/joy-stack/references/pstack-integration.md), and [Theo Browne's tstack](skills/engineering/joy-stack/references/tstack-integration.md). Each records provenance, the reviewed snapshot, current method mapping, exclusions, and evidence limits. Unknown original versions remain unknown; a fresh review snapshot is not presented as historical provenance. The [current Matt/pstack comparison](docs/research/2026-11-23-matt-pstack-current-comparison.md) separates coverage, gaps, and recommendations not yet implemented.
 - [Oil dev skills](https://github.com/oil-oil/oil-dev-skills) is a method source only, never an installed, invoked, optional execution or fallback dependency. JoyStack and existing host tools provide the capabilities. See the [oil integration record](skills/engineering/joy-stack/references/oil-dev-integration.md) and the complete [integration index](skills/engineering/joy-stack/references/integration-sources.md).
 - `joy-loop` is adapted from `sol-loop` in [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a), retains the [upstream MIT license](skills/engineering/joy-loop/LICENSE), and documents its original author and adaptation scope in [NOTICE](skills/engineering/joy-loop/NOTICE.md).
+- `joy-token` independently expresses selected ideas from [codex-token-skills](https://github.com/lokikill123/codex-token-skills), adapted to official GPT/Sol mechanisms and JoyStack quality gates. Its [source record](skills/engineering/joy-token/references/sources.md) identifies the reviewed snapshot, excluded rules, and measurement limits. Cache hits, total tokens, and billing savings require separate evidence.
 
 These references are not runtime dependencies. JoyStack can be used without installing the upstream suites.
