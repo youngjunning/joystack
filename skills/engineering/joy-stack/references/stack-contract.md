@@ -52,6 +52,8 @@ Git 拥有 `references/pr-delivery.md` 与 `references/pr-observation.md` 的 PR
 
 ## 融合后续套件
 
+现有来源逐项见[融合记录索引](integration-sources.md)：Matt Pocock Skills、pstack、tstack 与 oil dev skills 分别保存原作者、固定核对版本、当前方法覆盖和未引入边界，不混用来源或把后来核对的版本写成最初采用版本。
+
 引入任何新能力前，先为它建立一张能力卡：触发场景、负责的输出、依赖事实、验证方式、权限边界与来源/许可。再映射到上表的一个或多个能力：
 
 1. 若它给出更好的实现方式但拥有同一输入/输出，替换对应模块，不让两个模块重复发号施令；

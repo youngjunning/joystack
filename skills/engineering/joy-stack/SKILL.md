@@ -45,6 +45,8 @@ JoyStack 持久运行数据默认在当前环境家目录下的 `.joystack`；�
 
 ## 可演进，而不锁定上游
 
+Matt Pocock Skills、pstack、tstack 与 oil dev skills 的独立来源、方法映射和验证边界统一见[融合记录索引](references/integration-sources.md)。来源对应不等于整体移植或新增运行依赖，未记录的最初参考版本保持未知。
+
 oil dev skills 只作方法来源；执行始终由 JoyStack 与宿主现有工具负责，不安装或调用该套件。具体映射与来源归属见[融合记录](references/oil-dev-integration.md)。
 
 JoyStack 吸收可公开、可验证的工程思想，但不要求安装任何特定第三方技能。以后发现更好的套件时，按套件契约为它标注覆盖的能力与输入/输出，即可替换或补强单个模块；不复制上游文本、脚本、资产或运行时，也不让一个总控流程垄断专业判断。已完成的上游映射见[融合记录](references/oil-dev-integration.md)。
