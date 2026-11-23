@@ -121,6 +121,8 @@ After updating, check that the host can discover the required modules. Reload re
 
 ## Development and verification
 
+On November 23, 2026, JoyStack selectively incorporated tstack methods for semantic refresh of old changes, takeover credit, problem-first PR communication, observation versus merge gates, and bounded review lifecycles. These extend existing modules: no Full Send/Stop controllers, watcher runtime, or mandatory three-provider council were added. See the [integration record](skills/engineering/joy-stack/references/tstack-integration.md) for mappings, twelve cases and evidence limits, and the [implementation plan](docs/plans/2026-11-23-tstack-integration.md). Static contract tests do not establish real PR/MR or multi-model execution success.
+
 `skills/engineering/` contains the maintained module sources; `catalog.json` is the catalog. Run these commands from the repository root:
 
 ```bash

@@ -121,6 +121,8 @@ git pull --ff-only
 
 ## 开发与验证
 
+2026-11-23 从 tstack 局部吸收旧变更语义重审、接手贡献保留、问题优先的 PR/评论、观察门禁分离和有界评审生命周期。均补强已有模块，不新增 Full Send/Stop、可执行 watcher 或强制三供应商 Council。映射、十二个案例与验收边界见[tstack 融合记录](skills/engineering/joy-stack/references/tstack-integration.md)，实施原文见[融合方案](docs/plans/2026-11-23-tstack-integration.md)。静态契约测试不证明真实 PR/MR 或多模型运行成功。
+
 `skills/engineering/` 是模块维护源，`catalog.json` 是目录索引。从仓库根目录执行：
 
 ```bash
