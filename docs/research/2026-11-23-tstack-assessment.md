@@ -137,12 +137,12 @@ sol-loop 把其他路径、少见案例、较小成本等默认视作 nit，能�
 | 保护规则读取失败与“确实没有规则”混在一起 | `pr-wait:221-245` | 两个读取均 403 后 required 为空，现有 lint pass 可两 poll 后 green；未知不能成为成功 |
 | ready 不要求人工 required approvals，也不排除 UNKNOWN/BLOCKED | `pr-wait:395-403,498-513` | 人工 CHANGES_REQUESTED 且无 unresolved，以及 UNKNOWN/BLOCKED 均可 ready/exit 0；应由父门禁补查 |
 | gating bot check 结束与 pass 混淆 | `pr-wait:415-435,507-513` | Greptile fail 非 required、lint pass 时仍可能被计为 bot done/ready |
-| 稳定快照只比较 check name/bucket，没有绑定 head | `pr-wait:378-383` | head A→B、checks 相同时，B 首 poll 可 ready；需按 head 重置快照并核对 checks 的 commit |
+| 稳定快照只比较 check name/bucket，没有绑定 head | `pr-wait:384-387` | head A→B、checks 相同时，B 首 poll 可 ready；需按 head 重置快照并核对 checks 的 commit |
 | 评论、review、thread 列表不分页 | `pr-wait:80-105` | last 100、thread comments first 100；未返回 unresolved 可能使 ready 判定漏项，缺失不是无问题 |
-| 无 gating bot、无 checks、未出现 required check，缺总等待预算 | `pr-wait:369-380,507-537` | 对应合成输入持续不终止；需 explicit unavailable/pending 与 bounded wait |
-| 平台和状态恢复限制 | `pr-wait:46,67-69,264-269` | 无条件 fcntl；状态 6 小时过期后重建 baseline，不是持久无损事件日志 |
+| 无 gating bot、无 checks、未出现 required check，缺总等待预算 | `pr-wait:369-380,507-549` | 对应合成输入连续两次 poll 仍 pending、未退出；无总等待期限由静态循环确认，而非实测长期等待 |
+| 平台和状态恢复限制 | `pr-wait:49,67-69,264-269` | 无条件 fcntl；状态 6 小时过期后重建 baseline，不是持久无损事件日志 |
 
-后台独立研究做了 25 个内存合成断言，包括正常 ready、required fail、CHANGES_REQUESTED、head 变化、UNKNOWN/BLOCKED、bot fail、unresolved/BEHIND、green/any-change、CLOSED/MERGED、无 checks/bot、mock lock 和首次失败 baseline。代码不执行真实 gh、模型调用、文件锁或网络。断言通过意味着这些路径可复现，不是上游已有 25 项测试，也不是实测生产成功率。
+后台独立研究做了 25 个内存合成断言，包括正常 ready、保护读取失败与缺失 required check、CHANGES_REQUESTED、head 变化、UNKNOWN/BLOCKED、非 required 的 bot fail、unresolved/BEHIND、green/any-change、CLOSED/MERGED、无 checks/bot、mock lock 和首次失败 baseline。本轮测试夹具未执行真实 gh、模型调用、文件锁或网络；原始 watcher 正常运行会调用 gh。断言通过意味着这些合成路径可复现，不是上游已有 25 项测试，也不是实测生产成功率；没有独立测试 required check fail/cancel 退出分支。
 
 上游 open issue/PR 的证据只用作定位：#8/#9 无界 reviewer 等待、#7 无默认 bot、#11 Windows、#14 首次失败后的 baseline。未合并改动不得计入现有兼容性，贡献者的模型幻觉率或耗时叙述不作为本报告测量结果。[U1]–[U5]
 
