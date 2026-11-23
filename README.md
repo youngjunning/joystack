@@ -139,7 +139,7 @@ python3 -m unittest discover -s skills/engineering/joy-git/scripts -p 'test_*.py
 
 JoyStack 采用 [MIT License](LICENSE)。
 
-- 工程方法参考分别记录：[Matt Pocock Skills](skills/engineering/joy-stack/references/matt-pocock-integration.md)、[Lauren Tan 的 pstack](skills/engineering/joy-stack/references/pstack-integration.md)、[Theo Browne 的 tstack](skills/engineering/joy-stack/references/tstack-integration.md)。每份说明来源、核对版本、实际方法落点、未吸收部分与验证边界；最初版本未记录时如实标明，不将重新核对版本冒充历史。
+- 工程方法参考分别记录：[Matt Pocock Skills](skills/engineering/joy-stack/references/matt-pocock-integration.md)、[Lauren Tan 的 pstack](skills/engineering/joy-stack/references/pstack-integration.md)、[Theo Browne 的 tstack](skills/engineering/joy-stack/references/tstack-integration.md)。每份说明来源、核对版本、实际方法落点、未吸收部分与验证边界；最初版本未记录时如实标明，不将重新核对版本冒充历史。另见[Matt/pstack 当前能力对比](docs/research/2026-11-23-matt-pstack-current-comparison.md)，区分覆盖、缺口与尚未实施的增量建议。
 - [oil dev skills](https://github.com/oil-oil/oil-dev-skills) 只作方法来源，不安装、调用或作为可选执行实现；能力由 JoyStack 与宿主工具提供。六类方法、固定版本与归属见[oil 融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。完整入口见[融合记录索引](skills/engineering/joy-stack/references/integration-sources.md)。
 - `joy-loop` 改编自 [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a) 的 `sol-loop`，保留[上游 MIT 许可](skills/engineering/joy-loop/LICENSE)；原作者与改编范围见 [NOTICE](skills/engineering/joy-loop/NOTICE.md)。
 

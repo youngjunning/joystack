@@ -1,5 +1,7 @@
 # pstack 融合记录
 
+后续核对见[2026-11-23 当前能力对比](https://github.com/youngjunning/joystack/blob/main/docs/research/2026-11-23-matt-pstack-current-comparison.md)：以 JoyStack `950183f1fd3af4a45e112c3c608994f382535a7f` 和下述上游快照分析当前差异，保留最初参考版本未知的事实；建议与实际采用分别记录。链接用于报告导航，不作为漂移版本的能力证据。
+
 ## 来源与核对范围
 
 pstack 的作者是 **Lauren Tan（poteto）**，来源为 [cursor/plugins 的 pstack](https://github.com/cursor/plugins/tree/7a583913eb1b8d1a0ee76753d1a2cf072e7b54f9/pstack)，不是 Matt Pocock 的 Skills，也不是 t3dotgg/tstack。本次核对日期为 2026-11-23；固定仓库快照 `7a583913eb1b8d1a0ee76753d1a2cf072e7b54f9`，pstack/plugin.json 的版本为 `0.15.46`，pstack 子目录 LICENSE 为 MIT / Copyright 2026 Lauren Tan。该许可依据属于 pstack 子目录，不从 cursor/plugins 根目录推导全仓库许可。

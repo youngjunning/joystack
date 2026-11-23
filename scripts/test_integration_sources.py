@@ -42,6 +42,23 @@ class IntegrationSourceRecordsTests(unittest.TestCase):
         self.assertIn('不安装、不调用', oil)
         self.assertIn('不作为可选执行实现或缺失能力的降级依赖', oil)
 
+    def test_current_comparison_is_linked_and_keeps_evidence_boundaries(self):
+        relative = 'docs/research/2026-11-23-matt-pstack-current-comparison.md'
+        report = (ROOT / relative).read_text()
+        for sha in ('abeeaf95660ba9e8b7c753eb38f441ca707a8823',
+                    '7a583913eb1b8d1a0ee76753d1a2cf072e7b54f9',
+                    '950183f1fd3af4a45e112c3c608994f382535a7f'):
+            self.assertIn(sha, report)
+        for phrase in ('已覆盖', '部分覆盖', '未覆盖', '增量建议尚未实施',
+                       '不能补造最初参考版本', '真实 Agent', '不安装、不调用'):
+            self.assertIn(phrase, report)
+        for file in ('integration-sources.md', 'matt-pocock-integration.md',
+                     'pstack-integration.md'):
+            self.assertIn(f'](https://github.com/youngjunning/joystack/blob/main/{relative})',
+                          (REFS / file).read_text())
+        for readme in ('README.md', 'README.en.md'):
+            self.assertIn(f']({relative})', (ROOT / readme).read_text())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,6 +2,8 @@
 
 不同来源独立记录原作者、固定核对版本、当前方法落点、未吸收部分与证据边界。方法参考、软件改编和运行依赖不是同一状态；对应原则可能交叉，不能把所有相似能力都归为单个来源。
 
+基于 2026-11-23 固定源码的[Matt/pstack 当前能力对比](https://github.com/youngjunning/joystack/blob/main/docs/research/2026-11-23-matt-pstack-current-comparison.md)单列已覆盖、部分覆盖、未覆盖与待讨论的增量建议；它不是最初来源重建，也不表示本次新增运行能力。此链接是仓库报告导航，证据仍以报告内固定 SHA 为准；独立安装不依赖仓库外层 docs 目录。
+
 | 来源 | 原作者 | 记录 | 归属与当前状态 |
 | --- | --- | --- | --- |
 | Matt Pocock Skills | Matt Pocock | [Matt Skills 融合记录](matt-pocock-integration.md) | 初期工程方法参考；本次固定快照核对当前覆盖，最初上游 SHA 未记录 |

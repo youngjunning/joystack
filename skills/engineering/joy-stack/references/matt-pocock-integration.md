@@ -1,5 +1,7 @@
 # Matt Pocock Skills 融合记录
 
+后续核对见[2026-11-23 当前能力对比](https://github.com/youngjunning/joystack/blob/main/docs/research/2026-11-23-matt-pstack-current-comparison.md)：以 JoyStack `950183f1fd3af4a45e112c3c608994f382535a7f` 和下述上游快照分析当前差异，保留最初参考版本未知的事实；建议与实际采用分别记录。链接用于报告导航，不作为漂移版本的能力证据。
+
 ## 来源与核对范围
 
 来源为 Matt Pocock 的 [mattpocock/skills](https://github.com/mattpocock/skills)，MIT / Copyright 2026 Matt Pocock。本次核对日期为 2026-11-23，上游固定快照为 `abeeaf95660ba9e8b7c753eb38f441ca707a8823`，主要读取 README、engineering 目录的相关 Skill、productivity/handoff 和 LICENSE。源码链接均固定该快照，不使用漂移的 main 作为本记录证据。
