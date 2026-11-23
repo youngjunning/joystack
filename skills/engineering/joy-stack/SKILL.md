@@ -8,22 +8,24 @@ metadata:
 
 # JoyStack
 
+跨技能交接按名称使用当前宿主已发现的 Skill，不要求相邻安装目录；缺少所需能力时报告缺项，不猜路径或擅自安装。
+
 JoyStack 是一套可组合的工程能力，而不是一篇流程说明。用户只需要描述目标；遇到适合的工程任务时，自动选择最少的组成能力。小改动不强行走全套，复杂工作也不依赖外部 Skill 套件才能完成。
 
 ## 默认路由
 
 先辨别任务主导面，再自动交给对应模块；同一任务可按顺序使用多个模块：
 
-- 不清楚现状、行为、历史原因或影响范围：[`joy-understand`](../joy-understand/SKILL.md)；
-- 目标、边界、术语或验收条件尚未清楚：[`joy-shape`](../joy-shape/SKILL.md)；
-- 实现一个已经清楚的改变：[`joy-build`](../joy-build/SKILL.md)；
-- 需要证明交付是否真的成立：[`joy-verify`](../joy-verify/SKILL.md)；
-- 复现、定位和修复异常：[`joy-debug`](../joy-debug/SKILL.md)；
-- 在合入或交付前检查遗漏：[`joy-review`](../joy-review/SKILL.md)；
-- 实质行为改动需要独立评审、修正与复验闭环：[`joy-loop`](../joy-loop/SKILL.md)；
-- 阶段性治理文档、测试、确定性检查、分支或 worktree：[`joy-govern`](../joy-govern/SKILL.md)；
-- 安全提交、推送或通过分支/PR 合入，以及 worktree 创建、用途盘点、续接与清理：[`joy-git`](../joy-git/SKILL.md)；
-- 跨轮续接、交接或保留经确认的判断：[`joy-continue`](../joy-continue/SKILL.md)。
+- 不清楚现状、行为、历史原因或影响范围：`joy-understand`；
+- 目标、边界、术语或验收条件尚未清楚：`joy-shape`；
+- 实现一个已经清楚的改变：`joy-build`；
+- 需要证明交付是否真的成立：`joy-verify`；
+- 复现、定位和修复异常：`joy-debug`；
+- 在合入或交付前检查遗漏：`joy-review`；
+- 实质行为改动需要独立评审、修正与复验闭环：`joy-loop`；
+- 阶段性治理文档、测试、确定性检查、分支或 worktree：`joy-govern`；
+- 安全提交、推送或通过分支/PR 合入，以及 worktree 创建、用途盘点、续接与清理：`joy-git`；
+- 跨轮续接、交接或保留经确认的判断：`joy-continue`。
 
 现有领域 Skill 优先主导自身职责，例如产品架构、UI、测试质量、写作或目标平台操作。JoyStack 只在它们之间维持同一个目标、边界与证据标准；`joy-git` 按需管理 worktree，并在项目规则与验证证据已明确时负责 Git 交付，不接管发布权限。
 

@@ -8,6 +8,8 @@ metadata:
 
 # JoyStack · Review
 
+跨技能交接按名称使用当前宿主已发现的 Skill，不要求相邻安装目录；缺少所需能力时报告缺项，不猜路径或擅自安装。
+
 以任务契约和实际 diff 为共同基线，分别检查两件事：变更是否实现承诺的结果，以及它是否破坏现有边界、错误处理、兼容性、可读性或验证能力。两类结论不互相替代。
 
 先检查范围漂移，再按风险决定深度。文案、样式和无行为变化的辅助改动可以轻量核对；并发与后台状态、数据格式与迁移、不可逆操作、鉴权/权限/支付、公开接口、打包升级以及项目标记的高风险路径需要独立干净上下文深审。
@@ -18,4 +20,4 @@ metadata:
 
 结论按 blocker、should、nit 分级；只有 blocker 与 should 影响通过。修正后只复查开放问题和新增 diff，除非改动已越出原审查基线。高频且跨模块的重复问题优先变成项目内确定性检查，偶发问题不追加常驻规则。
 
-发现未验证的关键主张交给 [`joy-verify`](../joy-verify/SKILL.md)；发现机制不明的缺陷交给 [`joy-debug`](../joy-debug/SKILL.md)。当调用方使用 [`joy-loop`](../joy-loop/SKILL.md) 时，本模块只返回 finding 与结论，不自行启动循环；finding ledger、作者修正、复验和再次评审由调用方的 Loop 维护。共享交接标准见[套件契约](../joy-stack/references/stack-contract.md)。
+发现未验证的关键主张交给 `joy-verify`；发现机制不明的缺陷交给 `joy-debug`。当调用方使用 `joy-loop` 时，本模块只返回 finding 与结论，不自行启动循环；finding ledger、作者修正、复验和再次评审由调用方的 Loop 维护。共享交接标准见套件契约（按技能名发现 `joy-stack`，再从其实际目录读取 `references/stack-contract.md`）。

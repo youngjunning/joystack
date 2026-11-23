@@ -11,6 +11,32 @@ SKIP = {'.git', '__pycache__', 'node_modules', '.next'}
 PRIVATE = re.compile(r'/(?:Users|home)/[^/\s]+/|\b(?:[\w-]+\.)*(?:alibaba-inc|aliway|fliggy)\.com\b')
 
 
+def markdown_targets(text):
+    inline = re.findall(r'\]\(([^\s)]+)\)', text)
+    definitions = re.findall(r'^ {0,3}\[[^\]\n]+\]:\s*(<[^>\n]+>|[^\s]+)', text, re.M)
+    return [target[1:-1] if target.startswith('<') and target.endswith('>') else target
+            for target in inline + definitions]
+
+
+def validate_skill_bundle(skill_dir):
+    """Each independently mounted Skill must carry its own relative resources."""
+    root = Path(skill_dir).resolve()
+    errors = []
+    for document in root.rglob('*.md'):
+        if not document.resolve().is_relative_to(root):
+            errors.append(f'outside bundled document: {document.relative_to(root)}')
+            continue
+        for target in markdown_targets(document.read_text()):
+            if target.startswith(('#', '/', '~')) or '://' in target:
+                continue
+            resource = (document.parent / unquote(target.split('#')[0])).resolve()
+            if not resource.is_relative_to(root):
+                errors.append(f'cross-Skill relative resource: {document.relative_to(root)}: {target}; use Skill-name discovery')
+            elif not resource.exists():
+                errors.append(f'missing bundled resource: {document.relative_to(root)}: {target}')
+    return errors
+
+
 def validate():
     errors = []
     catalog = json.loads((ROOT / 'catalog.json').read_text())
@@ -41,11 +67,7 @@ def validate():
             errors.append(f'missing or invalid author metadata: {path}')
         if not re.search(r'^  email:\s*luozhu2021@gmail\.com\s*$', metadata_text, re.M):
             errors.append(f'missing or invalid author email: {path}')
-        for target in re.findall(r'\]\(([^\s)]+)\)', text):
-            if target.startswith(('#', '/', '~')) or '://' in target:
-                continue
-            if not (skill.parent / unquote(target.split('#')[0])).resolve().exists():
-                errors.append(f'broken link: {path}: {target}')
+        errors.extend(f'{path}: {problem}' for problem in validate_skill_bundle(skill.parent))
     found = {str(path.parent.relative_to(ROOT)) for path in (ROOT / 'skills').glob('*/*/SKILL.md')}
     if found != paths:
         errors.append(f'catalog mismatch: {sorted(found ^ paths)}')
@@ -55,6 +77,11 @@ def validate():
             errors.append(f'README missing: {path}')
     for path in ROOT.rglob('*'):
         if any(part in SKIP for part in path.relative_to(ROOT).parts) or not path.is_file():
+            continue
+        relative = path.relative_to(ROOT)
+        boundary = ROOT / Path(*relative.parts[:3]) if len(relative.parts) >= 4 and relative.parts[0] == 'skills' else ROOT
+        if not path.resolve().is_relative_to(boundary.resolve()):
+            errors.append(f'outside public scan boundary: {relative}')
             continue
         try:
             text = path.read_text()

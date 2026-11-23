@@ -9,7 +9,7 @@
 - 项目或用户明确指定的位置在平台权限内优先；默认自建目录使用当前环境家目录下 `.joystack/worktrees/<repo>-<repository-id>/<task-slug>`。家目录由环境解析，不从 cwd/工作区推断。repository-id 来自 Git common directory 指纹，避免同名仓库互撞；目录名体现任务语义。
 - 宿主目录保留宿主路径。已有散落目录先只读盘点，确认用途后登记；不批量搬家，不从名字、提交时间或相似 diff 推断归属。
 - 项目内位置须已被 Git 忽略；脚本检查，不自动修改或提交 `.gitignore`。Git metadata 目录不作为工作目录。
-- 台账在 `~/.joystack/state/worktrees.json`；统一根目录与安装边界见 [JoyStack 全局目录](../../joy-stack/references/global-home.md)。只存本机必要信息，不放进项目源码、附件或公开 Git，不记录凭据、完整会话或敏感业务正文。
+- 台账在 `~/.joystack/state/worktrees.json`；统一根目录与安装边界见 JoyStack 全局目录（按技能名发现 `joy-stack`，再从其实际目录读取 `references/global-home.md`）。只存本机必要信息，不放进项目源码、附件或公开 Git，不记录凭据、完整会话或敏感业务正文。
 
 ## 原生脚本
 

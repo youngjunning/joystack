@@ -8,15 +8,17 @@ metadata:
 
 # JoyStack · Git Delivery & Worktrees
 
+跨技能交接按名称使用当前宿主已发现的 Skill，不要求相邻安装目录；缺少所需能力时报告缺项，不猜路径或擅自安装。
+
 负责 Git 交付与任务 worktree 的生命周期。产生仓库改动时，按项目规则与用户当次要求选择直接提交推送或任务分支 + PR；安全门通过后推进到获准终点。需要隔离或管理已有 worktree 时，让位置、用途、状态、成果去向和清理条件可查。它不替代实现、测试、评审、发布或合并冲突处理，不依赖第三方 worktree 管理器。
 
 ## 何时进入与交接
 
-Git 交付在 [`joy-verify`](../joy-verify/SKILL.md) 已给出相称证据、需要的 [`joy-loop`](../joy-loop/SKILL.md) 已通过，或用户明确要求 commit、push、PR、merge、Git 收尾时进入。输入是任务边界、项目协议、验证结果与当前仓库状态；输出是 Git 交付结果、提交/远端/PR 证据和保留事项。
+Git 交付在 `joy-verify` 已给出相称证据、需要的 `joy-loop` 已通过，或用户明确要求 commit、push、PR、merge、Git 收尾时进入。输入是任务边界、项目协议、验证结果与当前仓库状态；输出是 Git 交付结果、提交/远端/PR 证据和保留事项。
 
 准备创建隔离 worktree，或用户问目录用途、查 worktree 总览、认领、续接或清理时，直接进入 [worktree 生命周期](references/worktrees.md)，不必等实现完成。管理只读查询和本机台账不制造提交；没有本任务仓库改动时，Git 交付结果为 `no-action`，但仍完成所请求的管理工作。
 
-平台执行权限是上限；项目 `AGENTS.md`、发布协议和用户当次要求在该上限内优先于本模块。它们决定作者身份、默认交付方式、目标分支、PR/merge 门禁，以及 push 或 merge 是否具有发布副作用；本模块不猜测规则，不把安装当授权，也不把 Git 操作当发布或业务验收。受限平台在执行前按 [全局目录与平台适配](../joy-stack/references/global-home.md) 校验实际路径与 Git common-dir。
+平台执行权限是上限；项目 `AGENTS.md`、发布协议和用户当次要求在该上限内优先于本模块。它们决定作者身份、默认交付方式、目标分支、PR/merge 门禁，以及 push 或 merge 是否具有发布副作用；本模块不猜测规则，不把安装当授权，也不把 Git 操作当发布或业务验收。受限平台从按名称发现的 `joy-stack` 读取其 `references/global-home.md`，在执行前校验实际路径与 Git common-dir。
 
 ## 建立安全边界
 
@@ -39,8 +41,8 @@ Git 交付在 [`joy-verify`](../joy-verify/SKILL.md) 已给出相称证据、需
 ## 选择交付模式
 
 - **直接交付：** 项目允许向目标分支普通推送，目标 ref 与发布副作用明确时，提交任务文件并 fast-forward push；不为形式统一额外创建 PR。
-- **分支与 PR：** 项目要求、用户指定，或分支保护阻止直接推送时，从最新 base 建立任务分支，推送后创建或更新 PR。记录 head/base、PR URL、required checks、review 与 mergeability；新的代码问题回到 [`joy-loop`](../joy-loop/SKILL.md) 修正和复验。
-- **自动门禁守候：** 已获合并授权且只剩可观察的自动 required checks 时，使用宿主的 wait/monitoring 机制在当前交付任务的有界执行预算内持续回读。成功后继续合并；失败后把具体 finding 交回 [`joy-loop`](../joy-loop/SKILL.md) 修正、复验并更新 PR。只有需要人工 review 或其他外部动作、平台不可观测，或等待预算耗尽时，才以开放 PR 交接。
+- **分支与 PR：** 项目要求、用户指定，或分支保护阻止直接推送时，从最新 base 建立任务分支，推送后创建或更新 PR。记录 head/base、PR URL、required checks、review 与 mergeability；新的代码问题回到 `joy-loop` 修正和复验。
+- **自动门禁守候：** 已获合并授权且只剩可观察的自动 required checks 时，使用宿主的 wait/monitoring 机制在当前交付任务的有界执行预算内持续回读。成功后继续合并；失败后把具体 finding 交回 `joy-loop` 修正、复验并更新 PR。只有需要人工 review 或其他外部动作、平台不可观测，或等待预算耗尽时，才以开放 PR 交接。
 - **合并：** 只有项目规则或用户已授权合并，且 required checks、required review、冲突和分支保护全部通过时才执行允许的 merge 方式。合并后按平台报告的 merge/result commit 与 PR 终态回读 base 已包含合并结果，兼容 merge、squash 与 rebase；再按规则清理任务资源。
 
 ## 决策与执行

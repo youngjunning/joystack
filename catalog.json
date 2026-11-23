@@ -3,7 +3,7 @@
     "name": "joy-stack",
     "category": "engineering",
     "path": "skills/engineering/joy-stack",
-    "summary": "默认工程工作流底座，自动协调理解、定形、构建、验证、排障、复查闭环与交付"
+    "summary": "宿主中立的工程工作流底座，按技能名协调理解、构建、验证、复查闭环与交付"
   },
   {
     "name": "joy-understand",

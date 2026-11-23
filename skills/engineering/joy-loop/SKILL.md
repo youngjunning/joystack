@@ -8,6 +8,8 @@ metadata:
 
 # JoyStack · Loop
 
+跨技能交接按名称使用当前宿主已发现的 Skill，不要求相邻安装目录；缺少所需能力时报告缺项，不猜路径或擅自安装。
+
 把已经实现并取得初步证据的工程改动推进到可信终态：独立评审发现真实问题，作者核实并做最小修正，验证模块更新证据，再只针对开放问题和新增 diff 复查。Loop 只控制轮次、状态和停止条件；评审标准、实现、验证与 Git 交付分别由对应模块负责。
 
 ## 进入条件
@@ -18,9 +20,9 @@ metadata:
 
 ## 有限闭环
 
-1. **独立评审。** 在与实现上下文隔离的 reviewer 中执行 [`joy-review`](../joy-review/SKILL.md)。提供用户目标、范围外事项、任务 diff、必要上下文和验证证据；reviewer 只返回 finding 和 APPROVE/CHANGES，不编辑文件、不执行 Git 交付，也不启动新的 reviewer。
-2. **核实与修正。** 维护稳定 ID 的 finding ledger，严重度沿用 `blocker`、`should`、`nit`。作者逐项核实：成立的问题在当前 Loop 内交给 [`joy-build`](../joy-build/SKILL.md) 做最小修正，并把新 diff 交回同一个 Loop；不成立、范围外或纯偏好的 finding 用文件位置、测试或复现结果记录反证。
-3. **更新证据。** 每轮行为修正后在当前 Loop 内执行 [`joy-verify`](../joy-verify/SKILL.md)，至少重跑受影响检查，并把证据交回同一个 Loop；没有覆盖当前 diff 的旧验证不能作为通过证据。
+1. **独立评审。** 在与实现上下文隔离的 reviewer 中执行 `joy-review`。提供用户目标、范围外事项、任务 diff、必要上下文和验证证据；reviewer 只返回 finding 和 APPROVE/CHANGES，不编辑文件、不执行 Git 交付，也不启动新的 reviewer。
+2. **核实与修正。** 维护稳定 ID 的 finding ledger，严重度沿用 `blocker`、`should`、`nit`。作者逐项核实：成立的问题在当前 Loop 内交给 `joy-build` 做最小修正，并把新 diff 交回同一个 Loop；不成立、范围外或纯偏好的 finding 用文件位置、测试或复现结果记录反证。
+3. **更新证据。** 每轮行为修正后在当前 Loop 内执行 `joy-verify`，至少重跑受影响检查，并把证据交回同一个 Loop；没有覆盖当前 diff 的旧验证不能作为通过证据。
 4. **收敛。** 默认最多 3 轮。只有安全、权限、认证、数据丢失、状态或并发风险仍有新证据时，最多延长到 5 轮。后续轮次只复查开放的 `blocker`/`should` 和新增 diff；已结束的 reviewer 才能被替换或重试。
 
 reviewer 不可用、超时或失败都不算通过。同一问题经过两次有证据的回应仍有分歧，或轮次预算耗尽时，保留双方证据并结束为 `BLOCKED`。
@@ -30,4 +32,4 @@ reviewer 不可用、超时或失败都不算通过。同一问题经过两次�
 - **APPROVE：** 独立 reviewer 明确批准当前 diff，没有开放的 `blocker` 或 `should`，且最新行为改动已有相称验证。
 - **BLOCKED：** 输出最小待决问题、双方证据、已执行验证和恢复条件；预算耗尽不能写成通过。
 
-交回轮数、已解决和已驳回 finding、最新验证证据与终态。APPROVE 后由 [`joy-git`](../joy-git/SKILL.md) 按项目授权选择直接交付或分支/PR 流程；Loop 本身只维护复查闭环，不接管 Git 交付，也不把测试、构建、部署或真实业务结果互相替代。共享接口见[套件契约](../joy-stack/references/stack-contract.md)。
+交回轮数、已解决和已驳回 finding、最新验证证据与终态。APPROVE 后由 `joy-git` 按项目授权选择直接交付或分支/PR 流程；Loop 本身只维护复查闭环，不接管 Git 交付，也不把测试、构建、部署或真实业务结果互相替代。共享接口见套件契约（按技能名发现 `joy-stack`，再从其实际目录读取 `references/stack-contract.md`）。

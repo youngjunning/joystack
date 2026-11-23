@@ -10,7 +10,17 @@ JoyStack 是一套自动出现的工程能力栈。你只需描述目标；遇�
 npx skills add youngjunning/joystack
 ```
 
-安装时选择 JoyStack 的完整模块集。安装完成后正常描述任务即可，无需记忆子模块名称。
+安装时选择 JoyStack 的完整模块集。安装完成后正常描述任务即可，无需记忆子模块名称。平台可以将各 Skill 独立挂载；运行时按技能名使用当前宿主已发现的能力，不要求这些模块处于相邻目录。README 的仓库链接仅供源码浏览，不是安装路径约定。
+
+### 宿主适配
+
+| 适配面 | JoyStack 的统一规则 |
+| --- | --- |
+| 运行路径 | 默认使用当前环境家目录下 `.joystack`；工作区边界独立校验，只有明确授权才覆盖位置，不静默修改 HOME 或搬到 cwd。 |
+| 技能间调用 | 按 `joy-build`、`joy-verify` 等技能名发现和交接；每项技能只相对解析自身配套资源，独立挂载不依赖兄弟目录。缺失能力明确报告。 |
+| Git 操作授权 | 提交、推送、合并、删除遵守平台执行权限与已有项目授权；安装不授予权限。已授权且允许的自动交付继续推进，不因适配额外要求逐次确认。 |
+
+这些是运行契约，不是安装时自动改配置、搬目录或执行 Git 的脚本。完整规则见 `joy-stack` 所带的[套件契约](skills/engineering/joy-stack/references/stack-contract.md)和[全局目录与平台适配](skills/engineering/joy-stack/references/global-home.md)。
 
 ## 能力
 
@@ -37,6 +47,7 @@ JoyStack 持久运行数据默认放在**当前运行环境解析出的用户家
 
 ```bash
 python3 scripts/validate.py
+python3 -m unittest discover -s scripts -p 'test_*.py'
 python3 -m unittest discover -s skills/engineering/joy-git/scripts -p 'test_*.py'
 ```
 
