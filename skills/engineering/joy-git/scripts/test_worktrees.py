@@ -18,15 +18,25 @@ SCRIPT = Path(__file__).with_name("worktrees.py")
 
 class WorktreeTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="joy-git-test-")
+        boundary = os.environ.get("JOYSTACK_WORKSPACE")
+        temporary_root = Path.cwd() if boundary else None
+        if boundary and not Path.cwd().resolve().is_relative_to(Path(boundary).expanduser().resolve()):
+            raise RuntimeError("Run restricted-platform tests from inside JOYSTACK_WORKSPACE")
+        self.temporary = tempfile.TemporaryDirectory(prefix="joy-git-test-", dir=temporary_root)
         self.root = Path(self.temporary.name).resolve()
         self.repo = self.root / "repo"
         self.index = self.root / "state" / "index.json"
         self.env = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
-                    "GIT_TERMINAL_PROMPT": "0", "JOYSTACK_HOME": str(self.root / ".joystack")}
+                    "GIT_TERMINAL_PROMPT": "0", "JOYSTACK_HOME": str(self.root / ".joystack"),
+                    "GIT_CEILING_DIRECTORIES": str(self.root)}
+        for name in worktrees.GIT_PATH_OVERRIDES:
+            self.env.pop(name, None)
+        self.original_workspace = worktrees.WORKSPACE
+        worktrees.WORKSPACE = None
         self.init_repo(self.repo)
 
     def tearDown(self):
+        worktrees.WORKSPACE = self.original_workspace
         self.temporary.cleanup()
 
     def init_repo(self, path):
@@ -306,7 +316,9 @@ class WorktreeTests(unittest.TestCase):
     def test_known_repository_inventory_works_outside_git(self):
         path = self.native()
         self.register(path)
-        result = self.cli("list", "--json", cwd=self.root)
+        nongit = self.root / "not-a-repository"
+        nongit.mkdir()
+        result = self.cli("list", "--json", cwd=nongit)
         self.assertEqual(len(result["repositories"]), 1)
         self.assertEqual(len(result["worktrees"]), 2)
 
@@ -461,6 +473,243 @@ class WorktreeTests(unittest.TestCase):
         self.assertFalse(self.index.exists())
         self.assertTrue(destination[0].exists())
         self.assertEqual(self.run_git(destination[0], "branch", "--show-current"), args.branch)
+
+    def restricted(self, *args, ok=True, env=None, cwd=None, index=None):
+        environment = {**self.env, "JOYSTACK_WORKSPACE": str(self.root), **(env or {})}
+        result = subprocess.run([sys.executable, str(SCRIPT), "--index", str(index or self.index), *map(str, args)],
+                                cwd=cwd or self.repo, env=environment, capture_output=True, text=True)
+        if ok:
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return json.loads(result.stdout)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        return result
+
+    def test_home_is_resolved_from_environment_not_workspace(self):
+        environment = {**self.env, "HOME": str(self.root / "environment-home"),
+                       "JOYSTACK_HOME": "", "JOYSTACK_WORKSPACE": str(self.root)}
+        with patch.dict(os.environ, environment), patch.object(sys, "argv", [str(SCRIPT)]):
+            args = worktrees.parser().parse_args(["init"])
+            self.assertEqual(worktrees.global_home(), self.root / "environment-home/.joystack")
+            self.assertEqual(Path(args.index), self.root / "environment-home/.joystack/state/worktrees.json")
+            self.assertNotEqual(worktrees.global_home(), self.root / ".joystack")
+
+    def test_restricted_workspace_does_not_silently_relocate_external_home(self):
+        result = self.restricted("init", ok=False,
+                                 env={"JOYSTACK_HOME": str(self.root.parent / "unapproved-home/.joystack")})
+        self.assertIn("JoyStack home resolves outside", result.stderr)
+        self.assertFalse(self.index.parent.exists())
+
+    def test_restricted_init_and_create_stay_inside_approved_workspace(self):
+        self.restricted("init")
+        created = self.restricted(*self.create_args(), "--apply")
+        path = Path(created["path"])
+        self.assertTrue(path.is_relative_to(self.root))
+        rows = self.restricted("list", "--repo", self.repo, "--json")
+        self.assertEqual(rows["workspace"], str(self.root))
+        self.assertEqual(len(rows["worktrees"]), 2)
+        self.assertTrue(self.index.exists())
+
+    def test_restricted_external_index_and_root_rejected_before_write(self):
+        outside = self.root.parent / (self.root.name + "-outside")
+        result = self.restricted("init", index=outside / "state/index.json", ok=False)
+        self.assertIn("task index resolves outside", result.stderr)
+        result = self.restricted(*self.create_args(root=str(outside)), "--apply", ok=False)
+        self.assertIn("worktree root resolves outside", result.stderr)
+        self.assertFalse(outside.exists())
+        self.assertFalse(self.index.exists())
+        self.assertEqual(len(worktrees.worktrees(self.repo)), 1)
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlinks; Windows is not exercised")
+    def test_restricted_symlink_index_lock_root_and_marker_escape_rejected(self):
+        # External targets stay in this disposable test fixture, outside the selected boundary.
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        env = {"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")}
+        repo = scope / "repo"
+        self.init_repo(repo)
+        outside = self.root / "outside"
+        outside.mkdir()
+        index = scope / "state/index.json"
+        index.parent.mkdir()
+        (outside / "index.json").write_text(json.dumps(worktrees.empty_index()))
+        index.symlink_to(outside / "index.json")
+        self.restricted("init", cwd=repo, env=env, index=index, ok=False)
+        index.unlink()
+        lock = Path(str(index) + ".lock")
+        (outside / "lock").write_text("preserve")
+        lock.symlink_to(outside / "lock")
+        self.restricted("init", cwd=repo, env=env, index=index, ok=False)
+        self.assertEqual((outside / "lock").read_text(), "preserve")
+        lock.unlink()
+        root = scope / "escaped-root"
+        root.symlink_to(outside, target_is_directory=True)
+        result = self.restricted(*self.create_args(repo=str(repo), root=str(root)), "--apply", cwd=repo, env=env, index=index, ok=False)
+        self.assertIn("worktree root resolves outside", result.stderr)
+        # Entire Git metadata as a symlink must also be rejected before native Git.
+        (repo / ".git").rename(outside / "git")
+        (repo / ".git").symlink_to(outside / "git", target_is_directory=True)
+        before = (outside / "git/index").read_bytes()
+        result = self.restricted("list", "--repo", repo, "--json", cwd=repo, env=env, index=index, ok=False)
+        self.assertIn("Git marker resolves outside", result.stdout)
+        self.assertEqual((outside / "git/index").read_bytes(), before)
+
+    def test_restricted_linked_worktree_with_external_common_dir_rejected(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        path = self.native(path=scope / "linked")
+        before = (self.repo / ".git/index").read_bytes()
+        result = self.restricted("register", "--path", path, "--task", "task", "--session", "session",
+                                 "--target", "main", "--cleanup-when", "done", cwd=path,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=scope / "state/index.json", ok=False)
+        self.assertIn("Git directory resolves outside", result.stderr)
+        self.assertFalse((scope / "state/index.json").exists())
+        self.assertEqual((self.repo / ".git/index").read_bytes(), before)
+
+    def test_restricted_explicit_external_repository_is_an_error(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        result = self.restricted("list", "--repo", self.repo, "--json", cwd=scope,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=scope / "state/index.json", ok=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(json.loads(result.stdout)["repository_errors"])
+        self.assertFalse((scope / "state").exists())
+
+    def test_restricted_git_environment_redirects_rejected(self):
+        for name in worktrees.GIT_PATH_OVERRIDES:
+            with self.subTest(variable=name):
+                result = self.restricted("list", "--repo", self.repo, "--json",
+                                         env={name: str(self.root / "other-git-path")}, ok=False)
+                self.assertIn("inherited " + name, result.stdout)
+                self.assertEqual(result.returncode, 1)
+
+    def test_restricted_external_current_directory_rejected(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        result = self.restricted("init", cwd=self.repo,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=scope / "state/index.json", ok=False)
+        self.assertIn("current working directory resolves outside", result.stderr)
+        self.assertFalse((scope / ".joystack").exists())
+
+    def test_restricted_internal_gitdir_with_external_commondir_rejected(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        path = self.native(path=scope / "linked")
+        source_gitdir = Path(self.run_git(path, "rev-parse", "--absolute-git-dir"))
+        inside_gitdir = scope / "gitdir"
+        source_gitdir.rename(inside_gitdir)
+        # The gitfile is in scope, but commondir points to the source repo outside it.
+        (path / ".git").write_text("gitdir: " + str(inside_gitdir) + "\n")
+        (inside_gitdir / "commondir").write_text(str(self.repo / ".git") + "\n")
+        result = self.restricted("list", "--repo", path, "--json", cwd=path,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=scope / "state/index.json", ok=False)
+        self.assertIn("Git common-dir resolves outside", result.stdout)
+        self.assertFalse((scope / "state").exists())
+
+    def test_restricted_external_recorded_paths_are_not_followed(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        path = self.native()
+        self.register(path)
+        index = scope / "index.json"
+        index.write_bytes(self.index.read_bytes())
+        before = index.read_bytes()
+        result = self.restricted("list", "--json", cwd=scope,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=index, ok=False)
+        self.assertIn("recorded Git common-dir resolves outside", result.stderr)
+        self.assertEqual(index.read_bytes(), before)
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlinks; Windows is not exercised")
+    def test_restricted_branch_ref_and_reflog_symlinks_rejected_before_creation(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        outside = self.root / "outside"
+        outside.mkdir()
+        env = {"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")}
+        for number, relative in enumerate(("refs/heads", "logs/refs/heads", "refs/heads/task", "logs/refs/heads/task")):
+            with self.subTest(metadata=relative):
+                repo = scope / ("repo-" + str(number))
+                self.init_repo(repo)
+                marker = repo / ".git" / relative
+                external = outside / ("metadata-" + str(number))
+                if marker.exists():
+                    marker.rename(external)
+                else:
+                    external.mkdir()
+                    marker.parent.mkdir(parents=True, exist_ok=True)
+                marker.symlink_to(external, target_is_directory=True)
+                before = sorted(p.name for p in external.iterdir())
+                result = self.restricted(*self.create_args(repo=str(repo), root=str(scope / "managed"), branch="task/new"),
+                                         "--apply", cwd=repo, env=env, index=scope / "state/index.json", ok=False)
+                self.assertIn("Workspace boundary", result.stderr)
+                self.assertEqual(sorted(p.name for p in external.iterdir()), before)
+                self.assertFalse((scope / "state/index.json").exists())
+
+    def test_fixture_clears_inherited_git_path_redirects(self):
+        (self.repo / "file.txt").write_text("preserve pending data\n")
+        before_head = self.run_git(self.repo, "rev-parse", "HEAD")
+        before_index = (self.repo / ".git/index").read_bytes()
+        before_config = (self.repo / ".git/config").read_bytes()
+        cwd = Path.cwd()
+        nested = WorktreeTests("runTest")
+        initialized = False
+        try:
+            os.chdir(self.root)
+            inherited = {name: str(self.repo / ".git") for name in worktrees.GIT_PATH_OVERRIDES}
+            inherited["GIT_WORK_TREE"] = str(self.repo)
+            inherited["JOYSTACK_WORKSPACE"] = str(self.root)
+            with patch.dict(os.environ, inherited):
+                nested.setUp()
+                initialized = True
+                self.assertTrue(nested.root.is_relative_to(self.root))
+                self.assertFalse(any(name in nested.env for name in worktrees.GIT_PATH_OVERRIDES))
+        finally:
+            if initialized:
+                nested.tearDown()
+            os.chdir(cwd)
+        self.assertEqual(self.run_git(self.repo, "rev-parse", "HEAD"), before_head)
+        self.assertEqual((self.repo / ".git/index").read_bytes(), before_index)
+        self.assertEqual((self.repo / ".git/config").read_bytes(), before_config)
+        self.assertEqual((self.repo / "file.txt").read_text(), "preserve pending data\n")
+
+    def checkout_shorthand(self):
+        self.run_git(self.repo, "checkout", "-b", "task/previous")
+        self.run_git(self.repo, "checkout", "main")
+        self.run_git(self.repo, "branch", "-d", "task/previous")
+        self.assertEqual(self.run_git(self.repo, "check-ref-format", "--branch", "@{-1}"), "task/previous")
+
+    def test_checkout_shorthand_uses_normalized_branch_for_plan_and_creation(self):
+        self.checkout_shorthand()
+        plan = self.cli(*self.create_args(branch="@{-1}"))
+        self.assertEqual(plan["branch"], "task/previous")
+        created = self.cli(*self.create_args(branch="@{-1}"), "--apply")
+        self.assertEqual(created["branch"], "task/previous")
+        self.assertEqual(created["record"]["branch"], "task/previous")
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlinks; Windows is not exercised")
+    def test_restricted_checkout_shorthand_checks_normalized_ref_path(self):
+        scope = self.root / "restricted-scope"
+        scope.mkdir()
+        repo = scope / "repo"
+        self.init_repo(repo)
+        self.run_git(repo, "checkout", "-b", "task/previous")
+        self.run_git(repo, "checkout", "main")
+        self.run_git(repo, "branch", "-d", "task/previous")
+        outside = self.root / "external-refs"
+        outside.mkdir()
+        task_refs = repo / ".git/refs/heads/task"
+        task_refs.symlink_to(outside, target_is_directory=True)
+        result = self.restricted(*self.create_args(repo=str(repo), root=str(scope / "managed"), branch="@{-1}"),
+                                 "--apply", cwd=repo,
+                                 env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
+                                 index=scope / "state/index.json", ok=False)
+        self.assertIn("new branch metadata resolves outside", result.stderr)
+        self.assertFalse(list(outside.iterdir()))
+        self.assertFalse((scope / "state/index.json").exists())
 
 
 if __name__ == "__main__":

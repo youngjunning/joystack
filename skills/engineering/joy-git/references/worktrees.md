@@ -6,14 +6,16 @@
 
 默认在当前 checkout 工作。确有隔离需要时，先查仓库协议和当前 worktree 列表，复用适合该任务的已有目录；不要为了治理改成一律新建。
 
-- 项目或用户明确指定的位置优先；默认自建目录使用 `~/.joystack/worktrees/<repo>-<repository-id>/<task-slug>`。repository-id 来自 Git common directory 指纹，避免同名仓库互撞；目录名体现任务语义。
+- 项目或用户明确指定的位置在平台权限内优先；默认自建目录使用当前环境家目录下 `.joystack/worktrees/<repo>-<repository-id>/<task-slug>`。家目录由环境解析，不从 cwd/工作区推断。repository-id 来自 Git common directory 指纹，避免同名仓库互撞；目录名体现任务语义。
 - 宿主目录保留宿主路径。已有散落目录先只读盘点，确认用途后登记；不批量搬家，不从名字、提交时间或相似 diff 推断归属。
 - 项目内位置须已被 Git 忽略；脚本检查，不自动修改或提交 `.gitignore`。Git metadata 目录不作为工作目录。
 - 台账在 `~/.joystack/state/worktrees.json`；统一根目录与安装边界见 [JoyStack 全局目录](../../joy-stack/references/global-home.md)。只存本机必要信息，不放进项目源码、附件或公开 Git，不记录凭据、完整会话或敏感业务正文。
 
 ## 原生脚本
 
-入口为本 Skill 的 [scripts/worktrees.py](../scripts/worktrees.py)。命令中的 `SKILL_DIR` 替换为当前 Skill 目录；参数以 `--help` 为准。`JOYSTACK_HOME` 统一覆盖全局根目录；`--index`、`--root` 仅用于明确的项目覆盖或隔离测试，不改默认布局。
+入口为本 Skill 的 [scripts/worktrees.py](../scripts/worktrees.py)。`SKILL_DIR` 使用当前发现的实际 Skill 目录，不缓存某个账号的安装路径；参数以 `--help` 为准。`JOYSTACK_HOME` 明确覆盖数据根目录；`--index`、`--root` 用于明确的项目覆盖或隔离测试。
+
+受限平台必须由调用层提供 `JOYSTACK_WORKSPACE` 或全局 `--workspace`：检查 cwd、目录/台账/锁文件与 Git common-dir 的真实路径在边界内，覆盖参数和符号链接也要检查。边界不改默认家目录；不兼容时报告缺项，不能静默换位置。原生 Git 执行仍由平台沙箱和权限控制，这些校验不构成安全沙箱。
 
 用户要求初始化时执行 `python3 "$SKILL_DIR/scripts/worktrees.py" init`，幂等创建全局目录并保留已有台账。普通盘点、创建计划不执行 init。
 

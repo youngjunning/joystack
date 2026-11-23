@@ -29,7 +29,7 @@ JoyStack 是一套可组合的工程能力，而不是一篇流程说明。用�
 
 ## 全局运行数据
 
-JoyStack 持久运行数据统一使用 [全局目录](references/global-home.md) `~/.joystack`；新建任务 worktree 在 `~/.joystack/worktrees`，用途与状态台账在其 `state/` 下。Skills 安装入口保持用户既有约定，运行数据不另存到宿主配置目录。
+JoyStack 持久运行数据默认在当前环境家目录下的 `.joystack`；家目录由环境解析，不从工作区推断。worktrees 与状态台账统一归入其子目录；安装入口保持用户既有约定。受限平台的路径边界、模块加载与动作授权按 [全局目录与平台适配](references/global-home.md) 处理，安装不扩大平台权限。
 
 ## 统一交付契约
 

@@ -57,7 +57,7 @@
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",
-    "summary": "安全完成直接或分支/PR 的 Git 交付，管理 worktree 位置、用途、状态、续接与清理"
+    "summary": "按环境与平台授权安全完成 Git 交付，管理 worktree 位置、用途、状态、续接与清理"
   },
   {
     "name": "joy-continue",

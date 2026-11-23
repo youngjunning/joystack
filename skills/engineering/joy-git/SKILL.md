@@ -16,7 +16,7 @@ Git 交付在 [`joy-verify`](../joy-verify/SKILL.md) 已给出相称证据、需
 
 准备创建隔离 worktree，或用户问目录用途、查 worktree 总览、认领、续接或清理时，直接进入 [worktree 生命周期](references/worktrees.md)，不必等实现完成。管理只读查询和本机台账不制造提交；没有本任务仓库改动时，Git 交付结果为 `no-action`，但仍完成所请求的管理工作。
 
-项目 `AGENTS.md`、发布协议和用户当次要求优先于本模块。它们决定作者身份、默认交付方式、目标分支、PR/merge 门禁，以及 push 或 merge 是否具有发布副作用；本模块不猜测这些规则，也不把 Git 操作当作发布或业务验收。
+平台执行权限是上限；项目 `AGENTS.md`、发布协议和用户当次要求在该上限内优先于本模块。它们决定作者身份、默认交付方式、目标分支、PR/merge 门禁，以及 push 或 merge 是否具有发布副作用；本模块不猜测规则，不把安装当授权，也不把 Git 操作当发布或业务验收。受限平台在执行前按 [全局目录与平台适配](../joy-stack/references/global-home.md) 校验实际路径与 Git common-dir。
 
 ## 建立安全边界
 

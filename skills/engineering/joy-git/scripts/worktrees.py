@@ -16,6 +16,9 @@ import uuid
 STATES = ("active", "review", "merge", "verify", "paused", "done")
 OPERATIONS = ("MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "rebase-merge",
               "rebase-apply", "sequencer", "BISECT_LOG")
+WORKSPACE = None
+GIT_PATH_OVERRIDES = ("GIT_DIR", "GIT_COMMON_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
+                      "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES")
 
 
 class Error(Exception):
@@ -27,7 +30,49 @@ class NotRepository(Error):
 
 
 def global_home():
-    return Path(os.environ.get("JOYSTACK_HOME", "~/.joystack")).expanduser()
+    configured = os.environ.get("JOYSTACK_HOME")
+    return Path(configured).expanduser() if configured else Path.home() / ".joystack"
+
+
+def checked_path(path, label="path"):
+    resolved = Path(path).expanduser().resolve()
+    if WORKSPACE is not None and not resolved.is_relative_to(WORKSPACE):
+        raise Error(f"Workspace boundary: {label} resolves outside {WORKSPACE}: {resolved}")
+    return resolved
+
+
+def check_git_paths(repo):
+    """Check gitfile/common-dir before invoking Git, not just checkout location."""
+    path = checked_path(repo, "Git cwd")
+    if WORKSPACE is None:
+        return
+    for name in GIT_PATH_OVERRIDES:
+        if os.environ.get(name):
+            raise Error(f"Workspace boundary: inherited {name} redirects Git paths; clear it first")
+    for parent in (path, *path.parents):
+        if not parent.is_relative_to(WORKSPACE):
+            break
+        marker = checked_path(parent / ".git", "Git marker")
+        if marker.is_file():
+            content = marker.read_text().strip()
+            if not content.startswith("gitdir: "):
+                raise Error("Workspace boundary: invalid .git pointer")
+            gitdir = checked_path(parent / content[8:], "Git directory")
+        elif marker.is_dir():
+            gitdir = checked_path(marker, "Git directory")
+        elif (parent / "HEAD").is_file() and ((parent / "objects").is_dir() or (parent / "commondir").is_file()):
+            gitdir = checked_path(parent, "Git directory")
+        else:
+            continue
+        common_file = checked_path(gitdir / "commondir", "Git common-dir pointer")
+        common = checked_path(gitdir / common_file.read_text().strip(), "Git common-dir") if common_file.is_file() else gitdir
+        # These Git paths may themselves be symlinks; inspect before native Git writes.
+        for base, names in ((gitdir, ("HEAD", "index", "config.worktree", "logs")),
+                            (common, ("config", "objects", "refs", "refs/heads", "logs", "logs/refs/heads", "worktrees"))):
+            for name in names:
+                checked_path(base / name, "Git metadata " + name)
+        return
+    raise NotRepository("No Git repository inside the workspace boundary")
 
 
 def now():
@@ -39,6 +84,7 @@ def absolute(path):
 
 
 def git(repo, *args, check=True):
+    check_git_paths(repo)
     result = subprocess.run(
         ["git", "-C", str(repo), *args], stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, env={**os.environ, "GIT_OPTIONAL_LOCKS": "0", "LC_ALL": "C"},
@@ -64,7 +110,10 @@ def repository(path):
         if message.startswith("fatal: not a git repository"):
             raise NotRepository(message)
         raise Error(message or "Unable to discover Git repository")
-    common = absolute(text(discovery))
+    common = str(checked_path(text(discovery), "Git common-dir"))
+    top = git(path, "rev-parse", "--path-format=absolute", "--show-toplevel", check=False)
+    if top.returncode == 0:
+        checked_path(text(top), "Git working tree")
     rows = worktrees(common)
     name = Path(rows[0]["path"]).name if rows else Path(common).name
     return {"id": hashlib.sha256(os.fsencode(common)).hexdigest()[:12],
@@ -99,6 +148,7 @@ def empty_index():
 
 
 def load_index(path):
+    checked_path(path, "task index")
     if not path.exists():
         return empty_index()
     try:
@@ -110,10 +160,12 @@ def load_index(path):
             if (repo["id"] != key or not isinstance(repo["common_dir"], str)
                     or not isinstance(repo["name"], str)):
                 raise ValueError("invalid repository entry")
+            checked_path(repo["common_dir"], "recorded Git common-dir")
         for key, entry in data["worktrees"].items():
             if (entry["path"] != key or entry["repository_id"] not in data["repositories"]
                     or entry["state"] not in STATES):
                 raise ValueError("invalid worktree entry")
+            checked_path(key, "recorded worktree")
             for field in ("task", "session", "target", "cleanup_when", "updated_at", "registered_at"):
                 if not isinstance(entry[field], str) or not entry[field].strip():
                     raise ValueError(f"invalid worktree {field}")
@@ -127,6 +179,8 @@ def load_index(path):
 @contextmanager
 def locked_index(path):
     # All writers serialize read-modify-write; reports never create an index/lock.
+    checked_path(path, "task index")
+    checked_path(str(path) + ".lock", "task index lock")
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     with open(str(path) + ".lock", "a+b") as lock:
         if os.name == "nt":
@@ -150,6 +204,7 @@ def locked_index(path):
 
 
 def save_index(path, data):
+    checked_path(path, "task index")
     fd, temporary = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
     try:
         with os.fdopen(fd, "w") as stream:
@@ -164,7 +219,7 @@ def save_index(path, data):
 
 
 def actual_worktree(path):
-    path = absolute(path)
+    path = str(checked_path(path, "worktree"))
     repo = repository(path)
     row = next((r for r in worktrees(repo["common_dir"]) if r["path"] == path), None)
     if not row or row.get("primary") or row.get("bare"):
@@ -206,9 +261,11 @@ def create(args, index):
     repo = repository(args.repo)
     base = revision(repo["common_dir"], args.base or args.target)
     revision(repo["common_dir"], args.target)
-    git(repo["common_dir"], "check-ref-format", "--branch", args.branch)
-    root = Path(args.root).expanduser().resolve()
+    # Git expands checkout shorthand such as @{-1}; check/write the same ref.
+    args.branch = text(git(repo["common_dir"], "check-ref-format", "--branch", args.branch))
+    root = checked_path(args.root, "worktree root")
     path = root / (slug(repo["name"]) + "-" + repo["id"]) / slug(args.slug or args.task)
+    path = checked_path(path, "worktree destination")
     if path.is_relative_to(Path(repo["common_dir"])):
         raise Error("Worktree destination must be outside Git's metadata directory")
     if path.exists() or path.is_symlink():
@@ -227,6 +284,8 @@ def create(args, index):
         if str(path) in data["worktrees"]:
             raise Error("Destination has an existing task record; reconcile it before creation")
         path.parent.mkdir(parents=True, exist_ok=True)
+        for relative in ("refs/heads/" + args.branch, "logs/refs/heads/" + args.branch):
+            checked_path(Path(repo["common_dir"]) / relative, "new branch metadata")
         creation_error = None
         try:
             git(repo["common_dir"], "worktree", "add", "-b", args.branch, "--", str(path), base)
@@ -259,7 +318,7 @@ def create(args, index):
 
 def mutate(args, index):
     with locked_index(index) as data:
-        path = absolute(args.path)
+        path = str(checked_path(args.path, "worktree"))
         if args.command == "forget":
             entry = data["worktrees"].get(path)
             if not entry:
@@ -301,6 +360,13 @@ def snapshot(repo, row, entry, review_days):
               "state": entry.get("state") if entry else "unknown",
               "record": entry, "ref_freshness": "local-only", "cleanup_blockers": []}
     blockers = result["cleanup_blockers"]
+    try:
+        checked_path(row["path"], "listed worktree")
+    except Error as exc:
+        result["inspection_error"] = str(exc)
+        blockers.append("outside-workspace")
+        result["cleanup"] = "blocked"
+        return result
     if row.get("primary") or row.get("bare"):
         blockers.append("primary-or-bare")
     if not entry:
@@ -393,14 +459,22 @@ def inventory(args, index):
         except (Error, OSError, subprocess.TimeoutExpired) as exc:
             errors.append({"repository_id": repo["id"], "common_dir": repo["common_dir"], "error": str(exc)})
     return {"observed_at": now(), "coverage": "explicit-repositories" if args.repo else "known-repositories-plus-current-if-git",
+            "workspace": str(WORKSPACE) if WORKSPACE else None,
             "index": str(index), "repositories": list(repos.values()), "worktrees": rows,
             "repository_errors": errors, "deletion_authorized": False,
             "activity": "Session/process occupancy must be checked separately; commit/record age is not activity."}
 
 
 def parser():
+    global WORKSPACE
+    scope = argparse.ArgumentParser(add_help=False)
+    scope.add_argument("--workspace", default=os.environ.get("JOYSTACK_WORKSPACE"))
+    preliminary, _ = scope.parse_known_args()
+    WORKSPACE = Path(preliminary.workspace).expanduser().resolve() if preliminary.workspace else None
     home = global_home()
     cli = argparse.ArgumentParser(description=__doc__)
+    cli.add_argument("--workspace", default=preliminary.workspace,
+                     help="Platform-approved path boundary; does not change the environment's home directory")
     cli.add_argument("--index", default=str(home / "state/worktrees.json"))
     sub = cli.add_subparsers(dest="command", required=True)
     sub.add_parser("init", help="Initialize the JoyStack global worktrees/state directories; preserves existing records")
@@ -436,10 +510,14 @@ def parser():
 
 def main():
     args = parser().parse_args()
-    index = Path(args.index).expanduser().resolve()
     try:
+        if WORKSPACE is not None:
+            checked_path(Path.cwd(), "current working directory")
+        index = checked_path(args.index, "task index")
+        checked_path(global_home(), "JoyStack home")
         if args.command == "init":
-            home = global_home().resolve()
+            home = checked_path(global_home(), "JoyStack home")
+            checked_path(home / "worktrees", "worktree root")
             home.mkdir(mode=0o700, parents=True, exist_ok=True)
             with locked_index(index) as data:
                 (home / "worktrees").mkdir(mode=0o700, exist_ok=True)

@@ -29,7 +29,9 @@ npx skills add youngjunning/joystack
 
 [JoyStack 入口](skills/engineering/joy-stack/SKILL.md) 统一这些能力，定义最小任务契约和按风险升级的规则。[套件契约](skills/engineering/joy-stack/references/stack-contract.md) 让未来更好的开发套件可以替换或补强单个模块，不锁定某个模型、运行时或平台。
 
-JoyStack 持久运行数据统一使用 [全局目录](skills/engineering/joy-stack/references/global-home.md) `~/.joystack`。`joy-git` 内置 [worktree 生命周期](skills/engineering/joy-git/references/worktrees.md)与原生管理脚本：创建计划、任务登记、跨已知仓库总览、状态续接和清理候选；自建目录默认在 `~/.joystack/worktrees`，台账在 `~/.joystack/state/worktrees.json`。仅使用 Git + Python 3.9+ 标准库，不依赖 Worktrunk；已有或宿主目录不自动搬迁，未知用途不自动认领，清理前仍核对成果、占用与授权。
+JoyStack 持久运行数据默认放在**当前运行环境解析出的用户家目录下的 `.joystack`**；家目录由环境决定，不写死账号路径，也不把 cwd 当作家目录。`joy-git` 内置 [worktree 生命周期](skills/engineering/joy-git/references/worktrees.md)与原生管理脚本：创建计划、任务登记、跨已知仓库总览、状态续接和清理候选；自建目录在 `.joystack/worktrees`，台账在 `.joystack/state/worktrees.json`。仅使用 Git + Python 3.9+ 标准库，不依赖 Worktrunk；已有或宿主目录不自动搬迁，未知用途不自动认领，清理前仍核对成果、占用与授权。
+
+受限平台按 [全局目录与平台适配](skills/engineering/joy-stack/references/global-home.md) 使用平台明确提供的工作区边界。路径检查不能代替平台沙箱；安装技能不授予提交、推送、删除或工作区外访问权限。
 
 ## 维护
 
