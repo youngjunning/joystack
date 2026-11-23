@@ -12,6 +12,8 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 - 模块可以提出候选，不自动把会话、推测或敏感资料写入长期记录。
 - 每个模块在 `SKILL.md` frontmatter 中保留作者姓名与联系邮箱，来源身份由仓库校验统一检查。
 
+全局运行数据按 [JoyStack 全局目录](global-home.md) 放在 `~/.joystack`；模块共享相同根目录和各领域权威台账，不创建宿主副本。
+
 ## 模块接口
 
 | 能力 | 输入 | 可交接的输出 |
@@ -23,11 +25,13 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 | Debug | 可观察异常 | 已复现事实、已排除假设、根因与回归保护 |
 | Review | 变更与原目标 | 范围/契约/维护性问题及证据 |
 | Loop | 已初步验证的任务 diff、独立评审结论与轮次预算 | finding ledger、最新验证证据，以及当前 diff 的 APPROVE 或有证据的 BLOCKED |
-| Govern | 仓库文档、测试、规则与 Git 卫生事实 | 分级治理清单、确定性检查候选、分支/worktree 看板与安全处置条件 |
-| Git Delivery | 任务改动、验证证据与项目交付规则 | 直接或分支/PR 的 Git 交付结果、可链接的提交/远端/PR 证据与保留事项 |
+| Govern | 仓库文档、测试、规则与 Git 卫生事实 | 分级治理清单、确定性检查候选；worktree 管理交给 Git Delivery |
+| Git Delivery & Worktrees | 任务改动、验证证据、项目交付规则或 worktree 管理请求 | Git 交付与提交/远端/PR 证据；位置、任务用途、状态、保留原因、清理条件和实际处置结果 |
 | Continue | 已确认状态 | 可续接摘要、仍有效的决定与下一步条件 |
 
 `Loop` 是组合控制能力，不重复其他模块的专业判断：`Review` 定义 finding，`Build` 完成经核实的最小修正，`Verify` 更新证据，`Loop` 只维护轮次、ledger 与停止条件。一次只读评审可以直接使用 `Review`；需要作者修正并复验到可信终态时进入 `Loop`；通过后再由 `Git Delivery` 按项目规则选择直接提交推送或分支/PR 合入。
+
+`Git Delivery` 同时拥有 [worktree 生命周期](../../joy-git/references/worktrees.md)：隔离开始时进入，不等到交付。Govern 只发现治理需要，不另建台账或清理规则。worktree 查询不修改 Git；本机登记不制造仓库提交；清理候选不授权删除，也不依赖特定宿主或第三方管理器。
 
 ## 融合后续套件
 

@@ -1,18 +1,20 @@
 ---
 name: joy-git
-description: 在 Git 仓库任务完成时选择直接交付或分支/PR 流程，安全执行获准的提交、推送、PR 与合并收尾；不用于只读问答、评审或无改动诊断。
+description: 安全完成 Git 提交、推送、PR 与合并交付；管理 worktree 的位置、任务用途、状态、续接和清理。用户查询、创建、认领或清理 worktree 时也使用；普通代码评审与无关只读问答不触发。
 metadata:
   author: 杨俊宁
   email: luozhu2021@gmail.com
 ---
 
-# JoyStack · Git Delivery
+# JoyStack · Git Delivery & Worktrees
 
-当任务在 Git 仓库产生实现、修复、测试、文档、依赖或版本改动时，在交付前负责 Git 安全边界。按项目规则与用户当次要求选择直接提交推送或任务分支 + PR；安全门通过后推进到该模式的获准终点，不因缺少重复确认停在工作区。它不替代实现、测试、评审、发布或合并冲突处理。
+负责 Git 交付与任务 worktree 的生命周期。产生仓库改动时，按项目规则与用户当次要求选择直接提交推送或任务分支 + PR；安全门通过后推进到获准终点。需要隔离或管理已有 worktree 时，让位置、用途、状态、成果去向和清理条件可查。它不替代实现、测试、评审、发布或合并冲突处理，不依赖第三方 worktree 管理器。
 
 ## 何时进入与交接
 
-在 [`joy-verify`](../joy-verify/SKILL.md) 已给出相称证据、需要的 [`joy-loop`](../joy-loop/SKILL.md) 已通过，或用户明确要求 commit、push、PR、merge、Git 收尾时进入。输入是任务边界、项目协议、验证结果与当前仓库状态；输出是明确的 Git 交付结果、提交/远端/PR 证据和保留在工作区的事项。无本任务改动的只读工作直接返回 `no-action`。
+Git 交付在 [`joy-verify`](../joy-verify/SKILL.md) 已给出相称证据、需要的 [`joy-loop`](../joy-loop/SKILL.md) 已通过，或用户明确要求 commit、push、PR、merge、Git 收尾时进入。输入是任务边界、项目协议、验证结果与当前仓库状态；输出是 Git 交付结果、提交/远端/PR 证据和保留事项。
+
+准备创建隔离 worktree，或用户问目录用途、查 worktree 总览、认领、续接或清理时，直接进入 [worktree 生命周期](references/worktrees.md)，不必等实现完成。管理只读查询和本机台账不制造提交；没有本任务仓库改动时，Git 交付结果为 `no-action`，但仍完成所请求的管理工作。
 
 项目 `AGENTS.md`、发布协议和用户当次要求优先于本模块。它们决定作者身份、默认交付方式、目标分支、PR/merge 门禁，以及 push 或 merge 是否具有发布副作用；本模块不猜测这些规则，也不把 Git 操作当作发布或业务验收。
 
@@ -26,13 +28,13 @@ metadata:
 
 交付模式和目标 ref 唯一时，脏工作区或分叉是隔离条件，不是默认停止理由：
 
-1. 获取目标远端的最新状态，以目标 ref 的确切 commit 创建任务专用分支和 worktree，并说明目录、分支、基线与原因。
+1. 获取目标远端的最新状态，按 [worktree 生命周期](references/worktrees.md) 从目标 ref 的确切 commit 创建任务专用分支与目录，立即登记任务、会话、基线、目标和清理条件。
 2. 只带入本任务文件或可审查补丁，不复制整个脏目录，也不 stash、reset、rebase 或改写原 checkout。
 3. 在隔离环境复验、显式暂存并检查 staged diff；无法脱离未提交依赖独立通过时再请求决定。
 4. 推送前再次获取目标 ref；远端前进且无语义冲突时，在未共享任务分支上重放任务提交并复验。
-5. 直接交付时以普通 fast-forward push 写入明确目标；PR 交付时推送任务分支并创建或更新指向明确 base 的 PR。成果已有明确采用路径且 worktree 干净后，移除本任务创建的 worktree；本地分支仍是开放 PR 或唯一恢复入口时保留。
+5. 直接交付时以普通 fast-forward push 写入明确目标；PR 交付时推送任务分支并创建或更新指向明确 base 的 PR。按 worktree 生命周期更新状态，核对成果采用、保留原因和会话/进程占用后执行获准清理；待评审、待合回或待验收时报告路径与退出条件。
 
-隔离不新增发布或合并权限，也不授权 force push、共享历史改写、admin bypass 或远端分支删除。预先存在的 worktree、分支和并行改动保持不动。
+隔离不新增发布或合并权限，也不授权 force push、共享历史改写、admin bypass 或远端分支删除。预先存在的 worktree、分支和并行改动默认只读保留；用户明确要求认领或清理的对象，按生命周期协议核对，不扩大到其他任务。
 
 ## 选择交付模式
 

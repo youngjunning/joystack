@@ -22,10 +22,14 @@ JoyStack 是一套可组合的工程能力，而不是一篇流程说明。用�
 - 在合入或交付前检查遗漏：[`joy-review`](../joy-review/SKILL.md)；
 - 实质行为改动需要独立评审、修正与复验闭环：[`joy-loop`](../joy-loop/SKILL.md)；
 - 阶段性治理文档、测试、确定性检查、分支或 worktree：[`joy-govern`](../joy-govern/SKILL.md)；
-- 在 Git 仓库安全提交、推送，或通过分支/PR 合入并收尾：[`joy-git`](../joy-git/SKILL.md)；
+- 安全提交、推送或通过分支/PR 合入，以及 worktree 创建、用途盘点、续接与清理：[`joy-git`](../joy-git/SKILL.md)；
 - 跨轮续接、交接或保留经确认的判断：[`joy-continue`](../joy-continue/SKILL.md)。
 
-现有领域 Skill 优先主导自身职责，例如产品架构、UI、测试质量、写作或目标平台操作。JoyStack 只在它们之间维持同一个目标、边界与证据标准；`joy-git` 只在项目规则与验证证据已明确时负责 Git 交付，不接管发布权限。
+现有领域 Skill 优先主导自身职责，例如产品架构、UI、测试质量、写作或目标平台操作。JoyStack 只在它们之间维持同一个目标、边界与证据标准；`joy-git` 按需管理 worktree，并在项目规则与验证证据已明确时负责 Git 交付，不接管发布权限。
+
+## 全局运行数据
+
+JoyStack 持久运行数据统一使用 [全局目录](references/global-home.md) `~/.joystack`；新建任务 worktree 在 `~/.joystack/worktrees`，用途与状态台账在其 `state/` 下。Skills 安装入口保持用户既有约定，运行数据不另存到宿主配置目录。
 
 ## 统一交付契约
 

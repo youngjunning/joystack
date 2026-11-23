@@ -24,15 +24,18 @@ npx skills add youngjunning/joystack
 | 合入或发布前独立检查 | [Review](skills/engineering/joy-review/SKILL.md) |
 | 实质行为改动需要独立评审、修正和复验到可信终态 | [Loop](skills/engineering/joy-loop/SKILL.md) |
 | 阶段性治理文档、测试、规则、分支与 worktree | [Govern](skills/engineering/joy-govern/SKILL.md) |
-| 需要安全提交、推送，或通过分支/PR 合入并生成可链接的逐仓库收尾事实 | [Git Delivery](skills/engineering/joy-git/SKILL.md) |
+| 安全提交、推送或合入；worktree 位置、用途、状态、续接与清理 | [Git Delivery & Worktrees](skills/engineering/joy-git/SKILL.md) |
 | 跨轮继续或交接 | [Continue](skills/engineering/joy-continue/SKILL.md) |
 
 [JoyStack 入口](skills/engineering/joy-stack/SKILL.md) 统一这些能力，定义最小任务契约和按风险升级的规则。[套件契约](skills/engineering/joy-stack/references/stack-contract.md) 让未来更好的开发套件可以替换或补强单个模块，不锁定某个模型、运行时或平台。
+
+JoyStack 持久运行数据统一使用 [全局目录](skills/engineering/joy-stack/references/global-home.md) `~/.joystack`。`joy-git` 内置 [worktree 生命周期](skills/engineering/joy-git/references/worktrees.md)与原生管理脚本：创建计划、任务登记、跨已知仓库总览、状态续接和清理候选；自建目录默认在 `~/.joystack/worktrees`，台账在 `~/.joystack/state/worktrees.json`。仅使用 Git + Python 3.9+ 标准库，不依赖 Worktrunk；已有或宿主目录不自动搬迁，未知用途不自动认领，清理前仍核对成果、占用与授权。
 
 ## 维护
 
 ```bash
 python3 scripts/validate.py
+python3 -m unittest discover -s skills/engineering/joy-git/scripts -p 'test_*.py'
 ```
 
 贡献者应维持模块之间明确的输入、输出与权限边界；不要把一个套件的专有运行时、模型路由或流程文本直接迁入 JoyStack。
