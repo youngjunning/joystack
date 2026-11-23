@@ -40,6 +40,8 @@ Git 交付在 `joy-verify` 已给出相称证据、需要的 `joy-loop` 已通�
 
 ## 选择交付模式
 
+任务采用 PR/MR、接手已有变更、只准备不合并或等待平台门禁时，先读[变更交付契约](references/pr-delivery.md)。它负责终点、贡献与门禁回查；平台观察只提供事件，不接管合并授权。普通直接提交推送仍沿用项目规则，不强制建 PR。
+
 - **直接交付：** 项目允许向目标分支普通推送，目标 ref 与发布副作用明确时，提交任务文件并 fast-forward push；不为形式统一额外创建 PR。
 - **分支与 PR：** 项目要求、用户指定，或分支保护阻止直接推送时，从最新 base 建立任务分支，推送后创建或更新 PR。记录 head/base、PR URL、required checks、review 与 mergeability；新的代码问题回到 `joy-loop` 修正和复验。
 - **自动门禁守候：** 已获合并授权且只剩可观察的自动 required checks 时，使用宿主的 wait/monitoring 机制在当前交付任务的有界执行预算内持续回读。成功后继续合并；失败后把具体 finding 交回 `joy-loop` 修正、复验并更新 PR。只有需要人工 review 或其他外部动作、平台不可观测，或等待预算耗尽时，才以开放 PR 交接。

@@ -39,13 +39,13 @@
     "name": "joy-review",
     "category": "engineering",
     "path": "skills/engineering/joy-review",
-    "summary": "按原目标与系统契约独立检查变更的正确性和可维护性"
+    "summary": "按原目标与系统契约独立评审，重大争议按权限与预算选择多视角复核"
   },
   {
     "name": "joy-loop",
     "category": "engineering",
     "path": "skills/engineering/joy-loop",
-    "summary": "协调独立评审、最小修正与复验，在有限轮次内形成 APPROVE 或有证据的 BLOCKED"
+    "summary": "以当前基线、轮次与时间预算协调独立评审、最小修正、复验和终止确认"
   },
   {
     "name": "joy-govern",
@@ -57,12 +57,12 @@
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",
-    "summary": "按环境与平台授权安全完成 Git 交付，管理 worktree 位置、用途、状态、续接与清理"
+    "summary": "按平台授权交付，保留贡献和 PR/MR 终点，分离观察与合并门禁并安全管理 worktree"
   },
   {
     "name": "joy-continue",
     "category": "engineering",
     "path": "skills/engineering/joy-continue",
-    "summary": "将经确认的工程状态整理为可续接、可审查的交接信息"
+    "summary": "恢复当前事实与最新纠正，语义重审旧变更，保留继承贡献并形成可续接交接"
   }
 ]

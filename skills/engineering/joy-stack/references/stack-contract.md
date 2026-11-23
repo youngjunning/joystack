@@ -36,6 +36,16 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 | Git Delivery & Worktrees | 任务改动、验证证据、项目交付规则或 worktree 管理请求 | Git 交付与提交/远端/PR 证据；位置、任务用途、状态、保留原因、清理条件和实际处置结果 |
 | Continue | 已确认状态 | 可续接摘要、仍有效的决定与下一步条件 |
 
+### 继承、评审与变更交付增量
+
+Continue 拥有 `references/inherited-work.md` 的 KEEP/REWORK/SUPERSEDED/UNRESOLVED 与贡献契约，Understand 还原现状，Shape 收敛实质变化，Git 只执行获准的重放/交付。历史 handoff 或无冲突不代替当前验收。
+
+Loop 拥有 `references/review-lifecycle.md` 的 checkpoint、时间/轮次预算、终止确认与 diff-growth；Review 提供基于证据的 finding，多视角按权限可选。预算耗尽、评分或仅打印 verdict 不替代终态。
+
+Git 拥有 `references/pr-delivery.md` 与 `references/pr-observation.md` 的 PR/MR 终点、贡献、评论与单一观察所有者；观察只返回事件和完整性，不产生 merge 授权。领域适配器在自身范围内映射同一语义，核心不绑定供应商或私有 API。
+
+以上 references 均从所属 Skill 的实际目录解析，不要求兄弟安装。缺少平台/多模型/通知能力时保留缺项，普通工程与获准直接 Git 交付仍可运行。
+
 `Loop` 是组合控制能力，不重复其他模块的专业判断：`Review` 定义 finding，`Build` 完成经核实的最小修正，`Verify` 更新证据，`Loop` 只维护轮次、ledger 与停止条件。一次只读评审可以直接使用 `Review`；需要作者修正并复验到可信终态时进入 `Loop`；通过后再由 `Git Delivery` 按项目规则选择直接提交推送或分支/PR 合入。
 
 `Git Delivery` 同时拥有 worktree 生命周期（按技能名发现 `joy-git`，再从其实际目录读取 `references/worktrees.md`）：隔离开始时进入，不等到交付。Govern 只发现治理需要，不另建台账或清理规则。worktree 查询不修改 Git；本机登记不制造仓库提交；清理候选不授权删除，也不依赖特定宿主或第三方管理器。
@@ -52,3 +62,5 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 一次融合应至少验证：原有任务仍能完成、新模块在它的触发场景能产出可观察结果、以及安装该模块与不安装它时的降级行为都明确。
 
 当前已完成的 oil dev skills 能力卡、映射和保留边界见 [oil dev skills 融合记录](oil-dev-integration.md)。
+
+tstack 九个 Skill 的映射、静态契约案例与运行验收边界见 [tstack 融合记录](tstack-integration.md)。

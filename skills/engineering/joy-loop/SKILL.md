@@ -20,10 +20,14 @@ metadata:
 
 ## 有限闭环
 
+启动 reviewer 前读取[评审生命周期](references/review-lifecycle.md)，固定本轮行为基线、时间/轮次/可见调用预算与终止方式。该协议不增加子 Agent 或模型路由权限；当前宿主不允许委托时报告独立评审缺口。
+
 1. **独立评审。** 在与实现上下文隔离的 reviewer 中执行 `joy-review`。提供用户目标、范围外事项、任务 diff、必要上下文和验证证据；reviewer 只返回 finding 和 APPROVE/CHANGES，不编辑文件、不执行 Git 交付，也不启动新的 reviewer。
 2. **核实与修正。** 维护稳定 ID 的 finding ledger，严重度沿用 `blocker`、`should`、`nit`。作者逐项核实：成立的问题在当前 Loop 内交给 `joy-build` 做最小修正，并把新 diff 交回同一个 Loop；不成立、范围外或纯偏好的 finding 用文件位置、测试或复现结果记录反证。
 3. **更新证据。** 每轮行为修正后在当前 Loop 内执行 `joy-verify`，至少重跑受影响检查，并把证据交回同一个 Loop；没有覆盖当前 diff 的旧验证不能作为通过证据。
 4. **收敛。** 默认最多 3 轮。只有安全、权限、认证、数据丢失、状态或并发风险仍有新证据时，最多延长到 5 轮。后续轮次只复查开放的 `blocker`/`should` 和新增 diff；已结束的 reviewer 才能被替换或重试。
+
+每轮修正后核对行为 diff 的增长与必要性；以相同基线记录开放 finding、新增代码和证据，不为满足评分增加范围外 helper、缓存、选项或测试。审查期间不改同一 checkout 的 scoped 文件；只有文案或已驳回 nit 改动无需无条件追加一轮。
 
 reviewer 不可用、超时或失败都不算通过。同一问题经过两次有证据的回应仍有分歧，或轮次预算耗尽时，保留双方证据并结束为 `BLOCKED`。
 
