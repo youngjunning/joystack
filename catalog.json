@@ -9,7 +9,7 @@
     "name": "joy-token",
     "category": "engineering",
     "path": "skills/engineering/joy-token",
-    "summary": "全程减少冗余上下文、工具输出与重复调用，保留指定模型、权限、验收和可核验计量边界"
+    "summary": "模型与宿主无关的全程 Token 节约；按实际接口能力处理缓存和计量，保留指定模型、权限与验收"
   },
   {
     "name": "joy-understand",

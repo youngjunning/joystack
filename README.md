@@ -33,7 +33,7 @@ npx skills add youngjunning/joystack -g
 - “检查这次修改是否符合原目标，并复验发现的问题。”
 - “列出这些仓库的 worktrees，说明用途和清理条件，先不要删除。”
 - “整理当前进度，让下次能继续；这轮不要提交。”
-- “保持我选的 GPT Sol 和验收要求，全程减少 Token 浪费。”
+- “保持我选的模型和验收要求，全程减少 Token 浪费。”
 
 Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或独立 reviewer 时，应明确说明，不把未执行的检查当作通过。
 
@@ -42,7 +42,7 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 | 模块 | 何时使用 | 主要结果 |
 | --- | --- | --- |
 | [joy-stack](skills/engineering/joy-stack/SKILL.md) | 任务跨边界、目标模糊或需要验证与续接 | 选择必要模块，保持共同任务边界 |
-| [joy-token](skills/engineering/joy-token/SKILL.md) | 全程节流，或明确要求省 Token、上下文过大/调用重复 | 定向读取、精简输出与调用，保留模型/验收和计量边界 |
+| [joy-token](skills/engineering/joy-token/SKILL.md) | 任意模型/宿主下全程节流，或明确要求省 Token、上下文过大/调用重复 | 定向读取、精简输出与调用，按实际接口能力处理缓存/计量 |
 | [joy-understand](skills/engineering/joy-understand/SKILL.md) | 不清楚系统行为、原因或影响范围 | 当前事实、来源、推断与未知项 |
 | [joy-shape](skills/engineering/joy-shape/SKILL.md) | 范围、取舍或验收尚未明确 | 可实施的目标、边界与验收条件 |
 | [joy-build](skills/engineering/joy-build/SKILL.md) | 已有清楚的实现目标 | 最小可反馈的改动与局部验证 |
@@ -153,6 +153,6 @@ JoyStack 采用 [MIT License](LICENSE)。
 - 工程方法参考分别记录：[Matt Pocock Skills](skills/engineering/joy-stack/references/matt-pocock-integration.md)、[Lauren Tan 的 pstack](skills/engineering/joy-stack/references/pstack-integration.md)、[Theo Browne 的 tstack](skills/engineering/joy-stack/references/tstack-integration.md)。每份说明来源、核对版本、实际方法落点、未吸收部分与验证边界；最初版本未记录时如实标明，不将重新核对版本冒充历史。另见[Matt/pstack 当前能力对比](docs/research/2026-11-23-matt-pstack-current-comparison.md)，区分覆盖、缺口与尚未实施的增量建议。
 - [oil dev skills](https://github.com/oil-oil/oil-dev-skills) 只作方法来源，不安装、调用或作为可选执行实现；能力由 JoyStack 与宿主工具提供。六类方法、固定版本与归属见[oil 融合记录](skills/engineering/joy-stack/references/oil-dev-integration.md)。完整入口见[融合记录索引](skills/engineering/joy-stack/references/integration-sources.md)。
 - `joy-loop` 改编自 [t3dotgg/tstack](https://github.com/t3dotgg/tstack/tree/11e37a74d0a6868c121cd0910ab2b3bd9873b92a) 的 `sol-loop`，保留[上游 MIT 许可](skills/engineering/joy-loop/LICENSE)；原作者与改编范围见 [NOTICE](skills/engineering/joy-loop/NOTICE.md)。
-- `joy-token` 参考 [codex-token-skills](https://github.com/lokikill123/codex-token-skills) 并独立表述，按 GPT/Sol 官方机制与 JoyStack 门禁约束适配；固定版本、未吸收规则与测量边界见[来源记录](skills/engineering/joy-token/references/sources.md)。缓存命中、Token 总量与账单节省分别验收，不承诺未经实测的降幅。
+- `joy-token` 参考 [codex-token-skills](https://github.com/lokikill123/codex-token-skills) 并独立表述为模型与宿主无关的通用能力，不绑定 GPT/Sol 或其他供应商；通用节流贯穿各模块，缓存/推理控制/计量按实际接口能力处理。固定版本、可选官方案例与测量边界见[来源记录](skills/engineering/joy-token/references/sources.md)。缓存命中、Token 总量与账单节省分别验收，不承诺未经实测的降幅。
 
 这些来源不是运行依赖，无需安装上游套件即可使用 JoyStack。
