@@ -64,6 +64,8 @@ The module moved from joyally-test on November 24, 2026. Use joy-test as the ins
 
 ## How work is handled
 
+The November 24, 2026 [method completion record](skills/engineering/joy-stack/references/matt-method-completion.md) maps separate review axes, executable diagnosis, active domain modeling, module interfaces, logic/UI prototypes, primary research and architecture audits to existing modules. Research belongs to joy-understand, domain/interface/prototype decisions to joy-shape, and architecture-friction candidates to joy-govern. Design and diagrams retain their specialist owners; no retired Matt entrypoints or mandatory all-stage workflow are required.
+
 - **Establish scope first.** Current code, configuration, and runtime state are the sources of truth. Historical summaries are pointers, not current evidence. Other tasks' files and uncommitted changes are preserved.
 - **Match checks to risk.** Small changes do not require the full suite of workflows. Behavioral changes use `joy-loop` for independent review, fixes, and reverification; unresolved important issues retain a clear blocking reason.
 - **Report evidence separately.** Tests, builds, commits, pushes, deployments, and real business outcomes are confirmed independently. Success at one step does not prove the next step is complete.

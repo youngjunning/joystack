@@ -15,13 +15,13 @@
     "name": "joy-understand",
     "category": "engineering",
     "path": "skills/engineering/joy-understand",
-    "summary": "还原系统当前行为、历史原因与影响范围，区分事实、推断和未知项"
+    "summary": "还原当前事实和影响，按一手资料研究工程问题，区分版本、推断与失败边界"
   },
   {
     "name": "joy-shape",
     "category": "engineering",
     "path": "skills/engineering/joy-shape",
-    "summary": "将模糊目标收敛为最小结果、边界、验收条件和待决定项"
+    "summary": "收敛目标，主动校准领域语言，比较模块接口/seam 和逻辑/UI 原型，形成可实施契约"
   },
   {
     "name": "joy-build",
@@ -45,13 +45,13 @@
     "name": "joy-debug",
     "category": "engineering",
     "path": "skills/engineering/joy-debug",
-    "summary": "复现、缩小并定位异常根因，形成可验证的回归保护"
+    "summary": "用可运行反馈、区分实验与原场景回验定位根因，建立回归并清理临时资源"
   },
   {
     "name": "joy-review",
     "category": "engineering",
     "path": "skills/engineering/joy-review",
-    "summary": "按原目标与系统契约独立评审，重大争议按权限与预算选择多视角复核"
+    "summary": "以固定 diff 分别检查规格和规范，按证据报告维护性风险并保留独立评审边界"
   },
   {
     "name": "joy-loop",
@@ -63,7 +63,7 @@
     "name": "joy-govern",
     "category": "engineering",
     "path": "skills/engineering/joy-govern",
-    "summary": "依据仓库事实治理文档、测试分层、确定性检查、分支与 worktree 卫生"
+    "summary": "治理文档、测试和 Git 卫生，体检真实架构摩擦并提出有证据的改造候选"
   },
   {
     "name": "joy-git",

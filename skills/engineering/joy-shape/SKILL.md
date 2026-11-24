@@ -1,12 +1,14 @@
 ---
 name: joy-shape
-description: 将模糊需求收敛成可实施、可验收的最小结果与系统边界；用于目标、术语、取舍或成功条件尚未明确时。
+description: 将模糊目标、领域术语和设计取舍收敛成可实施、可验收的结果；承接主动领域建模、模块接口/seam 设计、替代方案与逻辑/UI 原型问题。明确的实施交 Build，视觉由设计专项主导。
 metadata:
   author: 杨俊宁
   email: luozhu2021@gmail.com
 ---
 
 # JoyStack · Shape
+
+按问题只读所需分支：术语、状态和 glossary/ADR 的主动校准读[领域建模](references/domain-modeling.md)；接口负担、深模块、依赖和方案比较读[模块设计](references/module-design.md)；需要实际按按钮或比较页面才能决定时读[原型](references/prototypes.md)。已明确的小改不展开这些参考，原产品/设计主导权不变。
 
 跨技能交接按名称使用当前宿主已发现的 Skill，不要求相邻安装目录；缺少所需能力时报告缺项，不猜路径或擅自安装。
 

@@ -1,5 +1,7 @@
 # Matt Pocock Skills 融合记录
 
+2026-11-24 的[方法补强](matt-method-completion.md)已新增主栈的领域建模、模块设计、原型、研究、架构体检，以及评审/诊断细则；以下对照保留历史核对范围，不应把历史“未整体引入”当作当前完全缺失，也不称本次为上游默认值的全量复制。
+
 后续核对见[2026-11-23 当前能力对比](https://github.com/youngjunning/joystack/blob/main/docs/research/2026-11-23-matt-pstack-current-comparison.md)：以 JoyStack `950183f1fd3af4a45e112c3c608994f382535a7f` 和下述上游快照分析当前差异，保留最初参考版本未知的事实；建议与实际采用分别记录。链接用于报告导航，不作为漂移版本的能力证据。
 
 ## 来源与核对范围

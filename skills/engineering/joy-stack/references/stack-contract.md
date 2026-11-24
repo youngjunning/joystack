@@ -39,6 +39,8 @@ JoyStack 的模块以能力边界协作，不以固定顺序或特定模型协�
 | Git Delivery & Worktrees | 任务改动、验证证据、项目交付规则或 worktree 管理请求 | Git 交付与提交/远端/PR 证据；位置、任务用途、状态、保留原因、清理条件和实际处置结果 |
 | Continue | 已确认状态 | 可续接摘要、仍有效的决定与下一步条件 |
 
+Understand 拥有一手资料研究；Shape 拥有领域概念/glossary/ADR、模块接口/seam 与原型问题；Govern 拥有源码架构摩擦体检。Review 分别核对 Spec/Standards，Debug 保存可运行反馈与原场景/清理证据。新增方法只补现有所有者，来源与差异见[方法补强](matt-method-completion.md)。UI 原型交设计专项，不以接口或原型简化删减用户视觉、交互、状态或动效；只读建议不授权实现、写入、删除或后台 Agent。
+
 `Token Efficiency` 是跨阶段约束而非独立优化流水线。`joy-token` 拥有按需加载、工具输出裁剪、重复调用、GPT/Sol 缓存与计量细则；Understand/Build/Verify/Review 继续负责专业结论，Loop 保留评审预算，Continue 保留工程续接。模型/API/宿主配置改动仍需对应授权；没有模块时继续最小事实读取与相称验证，不伪造节省量。
 
 ### 测试职责

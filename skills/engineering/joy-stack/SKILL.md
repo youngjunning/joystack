@@ -18,6 +18,7 @@ JoyStack 是一套可组合的工程能力，而不是一篇流程说明。用�
 
 - 不清楚现状、行为、历史原因或影响范围：`joy-understand`；
 - 目标、边界、术语或验收条件尚未清楚：`joy-shape`；
+- 领域建模、模块接口或原型需要决定：`joy-shape` 的对应按需分支；一手资料待查交 `joy-understand`；
 - 实现一个已经清楚的改变：`joy-build`；
 - 测试策略、TDD、用例实现与运行、测试失败或 AI/Agent evals：`joy-test`；
 - 需要证明交付是否真的成立：`joy-verify`；
@@ -51,6 +52,8 @@ JoyStack 持久运行数据默认在当前环境家目录下的 `.joystack`；�
 ## 可演进，而不锁定上游
 
 Matt Pocock Skills、pstack、tstack 与 oil dev skills 的独立来源、方法映射和验证边界统一见[融合记录索引](references/integration-sources.md)。来源对应不等于整体移植或新增运行依赖，未记录的最初参考版本保持未知。
+
+2026-11-24 的[方法补强与入口收敛](references/matt-method-completion.md)记录双轴评审、可运行诊断、领域/模块设计、逻辑/UI 原型、研究与架构体检的当前落点。只读所需分支，不另装被接替的独立入口；仍保留的手动专项不自动视为已替代。
 
 oil dev skills 只作方法来源；执行始终由 JoyStack 与宿主现有工具负责，不安装或调用该套件。具体映射与来源归属见[融合记录](references/oil-dev-integration.md)。
 
