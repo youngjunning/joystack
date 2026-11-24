@@ -45,6 +45,7 @@ The agent selects from the Skills available in its host. Missing modules, tools,
 | [joy-understand](skills/engineering/joy-understand/SKILL.md) | Behavior, causes, or impact are unclear | Current facts, sources, inferences, and unknowns |
 | [joy-shape](skills/engineering/joy-shape/SKILL.md) | Scope, tradeoffs, or acceptance criteria are unresolved | An implementable goal, boundaries, and acceptance criteria |
 | [joy-build](skills/engineering/joy-build/SKILL.md) | The implementation goal is clear | A small, feedback-ready change with local verification |
+| [joy-test](skills/engineering/joy-test/SKILL.md) | Testing strategy, TDD, test cases, Web/API acceptance or Agent evals | Test implementation, execution evidence, failure classification and quality governance; not overall delivery approval |
 | [joy-verify](skills/engineering/joy-verify/SKILL.md) | A result needs evidence | Test or acceptance evidence and uncovered boundaries |
 | [joy-debug](skills/engineering/joy-debug/SKILL.md) | Something fails, behaves unexpectedly, or regresses in performance | Reproduction, root cause, a fix, and regression protection |
 | [joy-review](skills/engineering/joy-review/SKILL.md) | A change needs independent inspection | Findings and a review verdict against the original goal |
@@ -54,6 +55,12 @@ The agent selects from the Skills available in its host. Missing modules, tools,
 | [joy-continue](skills/engineering/joy-continue/SKILL.md) | Work continues across sessions, pauses, or changes hands | A verifiable handoff that supports continuation |
 
 Modules are discovered and loaded by Skill name from the current host, without requiring adjacent installation directories. Each Skill resolves its own `references/`, `scripts/`, and assets from its entrypoint directory. Links in this README are for browsing source files.
+
+### Testing work
+
+joy-test owns testing strategy, test-first development, unit/integration/contract tests and critical E2E journeys, Web/API/accessibility environments, property/fuzz/mutation tests, AI/Agent evals and test quality. Select only the branches justified by current risk. joy-build owns product implementation, joy-verify aggregates delivery evidence, and joy-loop retains the same review loop. If joy-test is missing, use available tools only for claims they can prove, report uncovered required test gates, and never auto-install it or treat a passing build as passing tests.
+
+The module moved from joyally-test on November 24, 2026. Use joy-test as the installation identity; its five testing references and source attribution are included without requiring the retired entrypoint. See [testing source review](skills/engineering/joy-test/references/source-review.md).
 
 ## How work is handled
 
@@ -98,7 +105,7 @@ From the original project directory, update the existing JoyStack modules:
 
 ```bash
 npx skills update -p joy-stack joy-understand joy-shape joy-build \
-  joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue joy-token
+  joy-test joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue joy-token
 ```
 
 For a global installation, use the same command with `-g` instead of `-p`. Naming the modules avoids updating unrelated suites. This updates installed, CLI-tracked modules in the selected scope. To add modules introduced upstream, rerun `skills add` in the appropriate scope and select the complete module set. Refer to the [CLI documentation](https://github.com/vercel-labs/skills/blob/main/docs/commands.md) and `npx skills --help` for available options.

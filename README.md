@@ -46,6 +46,7 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 | [joy-understand](skills/engineering/joy-understand/SKILL.md) | 不清楚系统行为、原因或影响范围 | 当前事实、来源、推断与未知项 |
 | [joy-shape](skills/engineering/joy-shape/SKILL.md) | 范围、取舍或验收尚未明确 | 可实施的目标、边界与验收条件 |
 | [joy-build](skills/engineering/joy-build/SKILL.md) | 已有清楚的实现目标 | 最小可反馈的改动与局部验证 |
+| [joy-test](skills/engineering/joy-test/SKILL.md) | 测试策略、TDD、用例、Web/API 验收或 Agent evals | 测试实现、运行结果、失败分类与质量治理；不替代完整交付验收 |
 | [joy-verify](skills/engineering/joy-verify/SKILL.md) | 需要证明某项结果成立 | 测试或验收证据及未覆盖的边界 |
 | [joy-debug](skills/engineering/joy-debug/SKILL.md) | 出现异常、失败或性能回退 | 复现、根因、修复与回归保护 |
 | [joy-review](skills/engineering/joy-review/SKILL.md) | 需要独立检查当前变更 | 对照原目标的 finding 与评审结论 |
@@ -55,6 +56,12 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 | [joy-continue](skills/engineering/joy-continue/SKILL.md) | 跨轮继续、暂停或移交 | 可核对、可续接的交接信息 |
 
 模块按技能名从当前宿主发现和加载，不要求相邻安装目录。每个 Skill 的 `references/`、`scripts/` 和资产从其自身入口目录解析；本 README 的链接仅供浏览源码。
+
+### 测试工作
+
+joy-test 是主栈的测试入口：承接测试策略、test-first、单元/集成/契约与关键 E2E、Web/API/辅助技术目标环境、性质/fuzz/变异、AI/Agent evals 和测试质量治理。按当前风险选择分支，不为普通功能强制全仓审计；joy-build 管产品实现，joy-verify 汇总交付证据，joy-loop 保留同一评审闭环。缺少 joy-test 时仅以现有工具取得当前任务能证明的结果，必要测试门禁未覆盖必须明示，不自动安装或用构建通过冒充测试通过。
+
+该模块于 2026-11-24 从 joyally-test 迁入，安装入口使用 joy-test；原有五份测试参考与来源归属随包保留，不需要另装旧入口。来源和许可见[测试来源复核](skills/engineering/joy-test/references/source-review.md)。
 
 ## 工作方式与边界
 
@@ -99,7 +106,7 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 
 ```bash
 npx skills update -p joy-stack joy-understand joy-shape joy-build \
-  joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue joy-token
+  joy-test joy-verify joy-debug joy-review joy-loop joy-govern joy-git joy-continue joy-token
 ```
 
 全局安装使用同一命令，将 `-p` 改为 `-g`。显式列出模块名，避免顺带更新其他套件。命令只更新选定范围内已安装、由 CLI 跟踪的模块；上游新增模块时，重新执行对应范围的 `skills add`，选择完整模块集。具体选项以 [CLI 文档](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)和 `npx skills --help` 为准。

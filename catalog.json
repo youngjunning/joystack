@@ -30,6 +30,12 @@
     "summary": "以最小可反馈的纵向切片实现功能、重构或已定位修复"
   },
   {
+    "name": "joy-test",
+    "category": "engineering",
+    "path": "skills/engineering/joy-test",
+    "summary": "承接测试策略、TDD、用例与执行、Web/API 目标环境、AI/Agent evals、失败分类与质量治理"
+  },
+  {
     "name": "joy-verify",
     "category": "engineering",
     "path": "skills/engineering/joy-verify",

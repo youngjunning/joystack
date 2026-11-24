@@ -27,6 +27,8 @@ JoyStack 首次提交 [cce7d14](https://github.com/youngjunning/joystack/commit/
 
 ## 依赖、归属与验证边界
 
+2026-11-24，测试专项已从独立的 joyally-test 迁入主栈 joy-test：TDD 红绿反馈、独立 oracle、测试层级与质量、目标环境和 Agent evals 现在由主栈模块承接，不要求另装旧测试 Skill。上述历史表保留当时核对范围；当前测试的完整来源、未复制部分和许可见 [joy-test 来源复核](https://github.com/youngjunning/joystack/blob/main/skills/engineering/joy-test/references/source-review.md)。这次迁移不表示 Matt 的每项默认值已原样采用，也不证明其他评审或诊断缺口已补齐。
+
 JoyStack 不依赖安装 Matt Skills，也不把其插件、tracker、运行时、模型配置或脚本作为基础能力前提。本轮只补来源记录和导航，不安装、更新或移除用户已有 Matt Skills；用户在其它任务主动使用它们，与 JoyStack 的基础能力是否依赖它们是两个问题。
 
 本记录使用独立表述及短方法定位，未复制上游正文或脚本；未来实质复制仍需保留 MIT 与版权声明。Matt 是原方法资料的作者，JoyStack 的适配和取舍归本项目维护者；保存或安装不证明掌握、实践或本人参与上游开发。
