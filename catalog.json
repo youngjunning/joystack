@@ -33,7 +33,7 @@
     "name": "joy-test",
     "category": "engineering",
     "path": "skills/engineering/joy-test",
-    "summary": "承接测试策略、TDD、用例与执行、Web/API 目标环境、AI/Agent evals、失败分类与质量治理"
+    "summary": "承接测试策略、TDD、受影响测试选测与执行、Web/API 目标环境、AI/Agent evals、失败分类与质量治理"
   },
   {
     "name": "joy-verify",

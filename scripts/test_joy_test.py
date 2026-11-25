@@ -29,7 +29,7 @@ class JoyTestContractTests(unittest.TestCase):
             shutil.copytree(TEST, mount)
             self.assertEqual(validate_skill_bundle(mount), [])
             for name in ('test-methods.md', 'target-environments.md',
-                         'ai-agent-evals.md', 'quality-audit.md', 'source-review.md'):
+                         'ai-agent-evals.md', 'quality-audit.md', 'affected-tests.md', 'source-review.md'):
                 self.assertTrue((mount / 'references' / name).is_file(), name)
 
     def test_testing_owns_methods_without_taking_delivery_or_loop(self):

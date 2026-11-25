@@ -46,7 +46,7 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 | [joy-understand](skills/engineering/joy-understand/SKILL.md) | 不清楚系统行为、原因或影响范围 | 当前事实、来源、推断与未知项 |
 | [joy-shape](skills/engineering/joy-shape/SKILL.md) | 范围、取舍或验收尚未明确 | 可实施的目标、边界与验收条件 |
 | [joy-build](skills/engineering/joy-build/SKILL.md) | 已有清楚的实现目标 | 最小可反馈的改动与局部验证 |
-| [joy-test](skills/engineering/joy-test/SKILL.md) | 测试策略、TDD、用例、Web/API 验收或 Agent evals | 测试实现、运行结果、失败分类与质量治理；不替代完整交付验收 |
+| [joy-test](skills/engineering/joy-test/SKILL.md) | 测试策略、TDD、受影响测试选测、Web/API 验收或 Agent evals | 测试实现、选测依据、运行结果、失败分类与质量治理；不替代完整交付验收 |
 | [joy-verify](skills/engineering/joy-verify/SKILL.md) | 需要证明某项结果成立 | 测试或验收证据及未覆盖的边界 |
 | [joy-debug](skills/engineering/joy-debug/SKILL.md) | 出现异常、失败或性能回退 | 复现、根因、修复与回归保护 |
 | [joy-review](skills/engineering/joy-review/SKILL.md) | 需要独立检查当前变更 | 对照原目标的 finding 与评审结论 |
@@ -59,7 +59,7 @@ Agent 根据可用 Skills 选择所需能力。缺少模块、工具、权限或
 
 ### 测试工作
 
-joy-test 是主栈的测试入口：承接测试策略、test-first、单元/集成/契约与关键 E2E、Web/API/辅助技术目标环境、性质/fuzz/变异、AI/Agent evals 和测试质量治理。按当前风险选择分支，不为普通功能强制全仓审计；joy-build 管产品实现，joy-verify 汇总交付证据，joy-loop 保留同一评审闭环。缺少 joy-test 时仅以现有工具取得当前任务能证明的结果，必要测试门禁未覆盖必须明示，不自动安装或用构建通过冒充测试通过。
+joy-test 是主栈的测试入口：承接测试策略、test-first、受影响测试的安全选测、单元/集成/契约与关键 E2E、Web/API/辅助技术目标环境、性质/fuzz/变异、AI/Agent evals 和测试质量治理。按当前风险选择分支，不为普通功能强制全仓审计；joy-build 管产品实现，joy-verify 汇总交付证据，joy-loop 保留同一评审闭环。缺少 joy-test 时仅以现有工具取得当前任务能证明的结果，必要测试门禁未覆盖必须明示，不自动安装或用构建通过冒充测试通过。
 
 该模块于 2026-11-24 从 joyally-test 迁入，安装入口使用 joy-test；原有五份测试参考与来源归属随包保留，不需要另装旧入口。来源和许可见[测试来源复核](skills/engineering/joy-test/references/source-review.md)。
 

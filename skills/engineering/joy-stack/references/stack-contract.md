@@ -45,7 +45,7 @@ Understand 拥有一手资料研究；Shape 拥有领域概念/glossary/ADR、�
 
 ### 测试职责
 
-joy-test 是测试工作的主入口，拥有测试策略、TDD、用例与 harness、执行/失败诊断、质量治理、Web/API/辅助技术目标环境和 AI/Agent evals；方法、目标环境、质量和来源参考均随模块携带。joy-build 保留产品实现，joy-debug 保留产品根因，joy-govern 保留仓库卫生体检，joy-review 保留独立源码评审，joy-verify 汇总整体交付证据。活动 joy-loop 内只交回测试证据，不开第二个 Loop。
+joy-test 是测试工作的主入口，拥有测试策略、TDD、用例与 harness、受影响测试安全选测、执行/失败诊断、质量治理、Web/API/辅助技术目标环境和 AI/Agent evals；方法、目标环境、质量和来源参考均随模块携带。joy-build 保留产品实现，joy-debug 保留产品根因，joy-govern 保留仓库卫生体检，joy-review 保留独立源码评审，joy-verify 汇总整体交付证据。活动 joy-loop 内只交回测试证据，不开第二个 Loop。
 
 明确 test-first/TDD 时先固定可观察行为、测试 seam 和独立 oracle，再取得有效 Red/Green；普通任务不强制测试先行或全仓审计。缺少 joy-test 时只用已有工具取得它们能证明的限定结果；必需测试未运行或保护缺口仍须报告，不能静默安装、削弱断言或用其他层级通过替代。
 
