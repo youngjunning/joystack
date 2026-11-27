@@ -156,6 +156,42 @@ class WorktreeTests(unittest.TestCase):
         self.assertFalse(result["deletion_authorized"])
         self.assertTrue(path.exists())
 
+    def test_close_previews_then_removes_only_completed_adopted_worktree(self):
+        path = self.native()
+        self.register(path)
+        self.cli("update", "--path", path, "--state", "done")
+        preview = self.cli("close", "--path", path)
+        self.assertEqual(preview["cleanup"], "needs-occupancy-review")
+        self.assertFalse(preview["applied"])
+        self.assertTrue(path.exists())
+        denied = self.cli("close", "--path", path, "--apply", ok=False)
+        self.assertIn("--sessions-clear", denied.stderr)
+        with patch.object(worktrees, "occupied_cwd", return_value=False):
+            result = self.cli("close", "--path", path, "--apply", "--sessions-clear")
+        self.assertTrue(result["applied"])
+        self.assertTrue(result["branch_retained"])
+        self.assertFalse(path.exists())
+        self.assertNotIn(str(path), json.loads(self.index.read_text())["worktrees"])
+        self.assertEqual(self.run_git(self.repo, "show-ref", "--verify", "refs/heads/feature") != "", True)
+
+    def test_close_rejects_retention_dirty_and_occupied_worktrees(self):
+        path = self.native()
+        self.register(path)
+        self.cli("update", "--path", path, "--state", "done", "--keep-reason", "pending review")
+        denied = self.cli("close", "--path", path, "--apply", "--sessions-clear", ok=False)
+        self.assertIn("explicit-retention", denied.stderr)
+        self.cli("update", "--path", path, "--keep-reason", "")
+        (path / "unsaved.txt").write_text("keep")
+        denied = self.cli("close", "--path", path, "--apply", "--sessions-clear", ok=False)
+        self.assertIn("uncommitted-or-untracked", denied.stderr)
+        (path / "unsaved.txt").unlink()
+        with patch.object(worktrees, "occupied_cwd", return_value=True):
+            args = worktrees.parser().parse_args(["--index", str(self.index), "close", "--path", str(path),
+                                                  "--apply", "--sessions-clear"])
+            with self.assertRaisesRegex(worktrees.Error, "A process is using"):
+                worktrees.closeout(args, self.index)
+        self.assertTrue(path.exists())
+
     def test_clean_active_task_is_not_a_candidate(self):
         path = self.native()
         self.register(path)

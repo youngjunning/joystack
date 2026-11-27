@@ -75,7 +75,7 @@ python3 "$SKILL_DIR/scripts/worktrees.py" cleanup-plan --repo /path/to/repo --js
 1. **对象与权限。** 明确路径、分支、任务和目标。主 checkout、bare repo 与用途未知目录保留；已有他人/宿主资源按明确认领和清理授权处理。
 2. **成果采用。** 依据最新目标 ref 和已完成的 PR/merge 证据，确认成果进入实际目标，原工作分支已接回或有明确可恢复采用路径。推送任务分支不等于合回。squash/rebase 使祖先检查不通过时单独核对采用映射；脚本保守阻塞，不自动作内容等价判断或强删。
 3. **现场与占用。** 回读 staged、unstaged、untracked、ignored、子模块与 Git 操作。忽略文件可能是缓存，也可能是凭据或资料，需逐项确认可丢弃。用当前宿主可用的任务/会话接口及系统进程信息查占用；无接口或无法确定时保留，不能用不存在锁、目录干净或提交很旧替代。当前执行目录先切换到保留的 checkout，不自动终止进程。
-4. **执行与回读。** 在保留的 checkout 调用 `git worktree remove /path/to/worktree`，不加 `--force`；拒绝时保留原因，不升级删除力度。回读 `git worktree list --porcelain -z` 并确认路径消失，再调用 `forget --path ...` 清除台账。forget 只删记录，路径或 Git 登记仍存在时拒绝。
+4. **执行与回读。** 在保留的 checkout 执行 `close --path /path/to/worktree` 预览；完成上面的人工作业/会话核对后增加 `--apply --sessions-clear`。命令在台账锁内重新检查状态、Git 事实、目标包含关系及进程 cwd，占用或事实变化即拒绝；使用不带 `--force` 的原生 `git worktree remove`，回读目录和 Git 登记均消失后才注销台账。`--sessions-clear` 是调用方已核对会话及非 cwd 进程的声明，不能用来跳过检查。失败时保留记录和分支，逐项排查，不升级删除力度。旧的手工移除流程仍可用 `forget --path ...` 单独注销已不存在的目录。
 
 本地分支是另一对象：开放 PR、尚未采用提交或唯一恢复入口仍需保留；只有已采用且不再被任何 worktree/任务使用时，按授权单独安全删除本地分支。没有远端分支删除授权。`git worktree prune` 仅清理失效 metadata，不清理目录；用途不明、锁定或外接盘暂不可用时不自动 prune。手工移动导致登记不一致时先检查原路径与宿主状态，按 Git repair 流程恢复，不把“不见了”当“已清理”。
 

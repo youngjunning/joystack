@@ -61,7 +61,7 @@ Git 拥有 `references/pr-delivery.md` 与 `references/pr-observation.md` 的 PR
 
 `Loop` 是组合控制能力，不重复其他模块的专业判断：`Review` 定义 finding，`Build` 完成经核实的最小修正，`Verify` 更新证据，`Loop` 只维护轮次、ledger 与停止条件。一次只读评审可以直接使用 `Review`；需要作者修正并复验到可信终态时进入 `Loop`；通过后再由 `Git Delivery` 按项目规则选择直接提交推送或分支/PR 合入。
 
-`Git Delivery` 同时拥有 worktree 生命周期（按技能名发现 `joy-git`，再从其实际目录读取 `references/worktrees.md`）：隔离开始时进入，不等到交付。Govern 只发现治理需要，不另建台账或清理规则。worktree 查询不修改 Git；本机登记不制造仓库提交；清理候选不授权删除，也不依赖特定宿主或第三方管理器。
+`Git Delivery` 同时拥有 worktree 生命周期（按技能名发现 `joy-git`，再从其实际目录读取 `references/worktrees.md`）：隔离开始时进入，不等到交付。Govern 只发现治理需要，不另建台账或清理规则。worktree 查询不修改 Git；本机登记不制造仓库提交；清理候选不授权删除。关闭命令在授权、会话核对后复查 Git 和进程占用，移除目录后才注销台账，保留分支；不依赖特定宿主或第三方管理器。
 
 ## 融合后续套件
 

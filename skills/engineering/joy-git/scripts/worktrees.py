@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task-aware worktree inventory. Git + Python stdlib; never deletes a worktree."""
+"""Task-aware worktree inventory and guarded single-worktree closeout."""
 import argparse
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -83,12 +84,12 @@ def absolute(path):
     return str(Path(path).expanduser().resolve())
 
 
-def git(repo, *args, check=True):
+def git(repo, *args, check=True, timeout=30):
     check_git_paths(repo)
     result = subprocess.run(
         ["git", "-C", str(repo), *args], stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, env={**os.environ, "GIT_OPTIONAL_LOCKS": "0", "LC_ALL": "C"},
-        timeout=30,
+        timeout=timeout,
     )
     if check and result.returncode:
         raise Error(os.fsdecode(result.stderr).strip() or f"git {args[0]} failed")
@@ -465,6 +466,70 @@ def inventory(args, index):
             "activity": "Session/process occupancy must be checked separately; commit/record age is not activity."}
 
 
+def closeout_snapshot(data, path):
+    entry = data["worktrees"].get(path)
+    if not entry:
+        raise Error("No registered task for this exact worktree path")
+    repo = data["repositories"][entry["repository_id"]]
+    row = next((item for item in worktrees(repo["common_dir"]) if item["path"] == path), None)
+    if not row:
+        raise Error("Git no longer registers this path; inspect and use forget only after the directory is absent")
+    return repo, entry, snapshot(repo, row, entry, review_days=0)
+
+
+def occupied_cwd(path):
+    if not shutil.which("lsof"):
+        raise Error("lsof is unavailable; process occupancy cannot be checked automatically")
+    result = subprocess.run(["lsof", "-n", "-P", "-d", "cwd", "-F0n"],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
+    if result.returncode not in (0, 1):
+        raise Error("lsof failed; process occupancy remains unknown")
+    root = Path(path)
+    for field in result.stdout.split(b"\0"):
+        if field.startswith(b"n"):
+            try:
+                if Path(os.fsdecode(field[1:])).resolve().is_relative_to(root):
+                    return True
+            except (OSError, ValueError):
+                raise Error("Unable to resolve a process working directory")
+    return False
+
+
+def closeout(args, index):
+    path = str(checked_path(args.path, "worktree"))
+
+    def plan(data):
+        repo, entry, row = closeout_snapshot(data, path)
+        return repo, entry, row, {"path": path, "branch": row.get("branch"),
+                                  "target": entry["target"], "cleanup": row["cleanup"],
+                                  "blockers": row["cleanup_blockers"], "applied": False,
+                                  "branch_retained": True}
+
+    if not args.apply:
+        return plan(load_index(index))[3]
+    if not args.sessions_clear:
+        raise Error("--sessions-clear is required after checking caller sessions and other process use")
+    with locked_index(index) as data:
+        repo, entry, row, result = plan(data)
+        if row["cleanup"] != "needs-occupancy-review":
+            raise Error("Closeout blocked: " + ", ".join(row["cleanup_blockers"]))
+        if Path.cwd().resolve().is_relative_to(Path(path)) or occupied_cwd(path):
+            raise Error("A process is using this worktree as its working directory")
+        # Re-read the target and worktree immediately before the native removal.
+        _, _, fresh = closeout_snapshot(data, path)
+        if fresh["cleanup"] != "needs-occupancy-review" or fresh["head"] != row["head"] \
+                or fresh.get("target_commit") != row.get("target_commit"):
+            raise Error("Worktree or target changed during closeout; review again")
+        git(repo["common_dir"], "worktree", "remove", path, timeout=300)
+        if Path(path).exists() or Path(path).is_symlink() \
+                or any(item["path"] == path for item in worktrees(repo["common_dir"])):
+            raise Error("Git removal did not fully clear the path; preserve the task record")
+        del data["worktrees"][path]
+        save_index(index, data)
+        return {**result, "cleanup": "closed", "blockers": [], "applied": True,
+                "record_forgotten": True}
+
+
 def parser():
     global WORKSPACE
     scope = argparse.ArgumentParser(add_help=False)
@@ -483,6 +548,11 @@ def parser():
         command.add_argument("--repo", action="append", help="Restrict to these repositories (repeatable); default: known + current")
         command.add_argument("--json", action="store_true")
         command.add_argument("--review-days", type=int, default=7, help="Record-age review reminder, never a deletion deadline")
+    command = sub.add_parser("close", help="Preview or safely remove one registered, adopted worktree; retain its branch")
+    command.add_argument("--path", required=True)
+    command.add_argument("--apply", action="store_true")
+    command.add_argument("--sessions-clear", action="store_true",
+                         help="Caller reviewed task sessions and non-cwd process use; required with --apply")
     for name in ("create", "register"):
         command = sub.add_parser(name)
         command.add_argument("--task", required=True)
@@ -546,6 +616,10 @@ def main():
                     print(json.dumps(error), file=sys.stderr)
                 print("Scope: known/explicit repositories only. Candidates still require session/process and authorization checks.")
             return 1 if result["repository_errors"] else 0
+        if args.command == "close":
+            result = closeout(args, index)
+            print(json.dumps(result, indent=2, ensure_ascii=True))
+            return 0
         result = create(args, index) if args.command == "create" else mutate(args, index)
         print(json.dumps(result, indent=2, ensure_ascii=True))
         return 0

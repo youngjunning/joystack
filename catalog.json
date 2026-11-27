@@ -69,7 +69,7 @@
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",
-    "summary": "按平台授权交付，保留贡献和 PR/MR 终点，分离观察与合并门禁并安全管理 worktree"
+    "summary": "按平台授权交付，保留贡献和 PR/MR 终点，分离观察与合并门禁，闭环管理 worktree 的登记、核对与关闭"
   },
   {
     "name": "joy-continue",
