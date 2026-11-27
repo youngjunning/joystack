@@ -172,6 +172,8 @@ def load_index(path):
                     raise ValueError(f"invalid worktree {field}")
             if not isinstance(entry.get("keep_reason", ""), str):
                 raise ValueError("invalid retention reason")
+            if entry.get("reason") is not None and (not isinstance(entry["reason"], str) or not entry["reason"].strip()):
+                raise ValueError("invalid isolation reason")
         return data
     except (ValueError, KeyError, TypeError, AttributeError) as exc:
         raise Error(f"Invalid index {path}: {exc}; preserve it and repair explicitly") from exc
@@ -204,8 +206,8 @@ def locked_index(path):
                 fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
-def save_index(path, data):
-    checked_path(path, "task index")
+def save_json(path, data):
+    checked_path(path, "JSON output")
     fd, temporary = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
     try:
         with os.fdopen(fd, "w") as stream:
@@ -236,6 +238,7 @@ def remember(data, repo, row, args, created=False):
         raise Error("Task/session ownership changed; use update with an explicit --state for handoff")
     entry = {**old, "id": old.get("id", str(uuid.uuid4())), "repository_id": repo["id"],
              "path": row["path"], "branch": row.get("branch"), "task": args.task,
+             "reason": old.get("reason") or args.reason,
              "session": args.session, "target": args.target, "cleanup_when": args.cleanup_when,
              "state": old.get("state", "active") if old.get("branch") == row.get("branch") else "active",
              "keep_reason": old.get("keep_reason", ""), "updated_at": now(),
@@ -278,7 +281,8 @@ def create(args, index):
             if ignored.returncode:
                 raise Error("Project-local worktree destination must already be ignored; no automatic .gitignore edit")
     plan = {"action": "create", "applied": False, "path": str(path), "branch": args.branch,
-            "base_commit": base, "target": args.target, "task": args.task, "session": args.session}
+            "base_commit": base, "target": args.target, "task": args.task,
+            "reason": args.reason, "session": args.session}
     if not args.apply:
         return plan
     with locked_index(index) as data:
@@ -310,7 +314,7 @@ def create(args, index):
             # Pin the base actually used, even if a ref moves while creation runs.
             args.base = base
             entry = remember(data, repo, row, args, created=True)
-            save_index(index, data)
+            save_json(index, data)
         except Exception as exc:
             raise Error(f"Worktree created at {path}, but registration failed: {exc}. "
                         "Inspect, then register; do not recreate") from exc
@@ -344,20 +348,21 @@ def mutate(args, index):
                 handoff = any(getattr(args, key, None) not in (None, result[key]) for key in ("task", "session"))
                 if handoff and args.state is None:
                     raise Error("Task/session handoff requires an explicit --state; completion is not inherited")
-                for key in ("state", "task", "session", "target", "cleanup_when", "keep_reason"):
+                for key in ("state", "task", "reason", "session", "target", "cleanup_when", "keep_reason"):
                     value = getattr(args, key, None)
                     if value is not None:
                         if key == "target":
                             revision(repo["common_dir"], value)
                         result[key] = value
                 result["updated_at"] = now()
-        save_index(index, data)
+        save_json(index, data)
         return result
 
 
 def snapshot(repo, row, entry, review_days):
     result = {**row, "repository_id": repo["id"], "repository": repo["name"],
               "task": entry.get("task") if entry else None,
+              "reason": entry.get("reason") if entry else None,
               "state": entry.get("state") if entry else "unknown",
               "record": entry, "ref_freshness": "local-only", "cleanup_blockers": []}
     blockers = result["cleanup_blockers"]
@@ -426,6 +431,7 @@ def snapshot(repo, row, entry, review_days):
 def inventory(args, index):
     data = load_index(index)
     repos, errors = {}, []
+    unresolved_paths = []
     if args.repo:
         for path in args.repo:
             try:
@@ -435,6 +441,29 @@ def inventory(args, index):
                 errors.append({"requested_path": absolute(path), "error": str(exc)})
     else:
         repos.update(data["repositories"])
+        root = checked_path(global_home() / "worktrees", "managed worktree root")
+        if root.exists():
+            try:
+                for group in root.iterdir():
+                    if not group.is_dir():
+                        continue
+                    if (group / ".git").exists():
+                        continue  # Legacy flat worktree; default discovery only follows grouped layout.
+                    if not re.fullmatch(r".+-[0-9a-f]{12}", group.name):
+                        unresolved_paths.append(str(checked_path(group, "non-grouped managed directory")))
+                        continue
+                    candidates = [child for child in group.iterdir() if child.is_dir()]
+                    for candidate in candidates:
+                        if not (candidate / ".git").exists():
+                            unresolved_paths.append(str(checked_path(candidate, "unresolved managed directory")))
+                            continue
+                        try:
+                            repo = repository(candidate)
+                            repos[repo["id"]] = repo
+                        except (Error, OSError, subprocess.TimeoutExpired) as exc:
+                            errors.append({"requested_path": str(candidate), "error": str(exc)})
+            except (Error, OSError) as exc:
+                errors.append({"requested_path": str(root), "error": str(exc)})
         try:
             repo = repository(Path.cwd())
             repos[repo["id"]] = repo
@@ -459,10 +488,11 @@ def inventory(args, index):
                                  "cleanup": "blocked", "cleanup_blockers": ["not-registered-in-git"]})
         except (Error, OSError, subprocess.TimeoutExpired) as exc:
             errors.append({"repository_id": repo["id"], "common_dir": repo["common_dir"], "error": str(exc)})
-    return {"observed_at": now(), "coverage": "explicit-repositories" if args.repo else "known-repositories-plus-current-if-git",
+    return {"observed_at": now(), "coverage": "explicit-repositories" if args.repo else "known-repositories-plus-managed-root-and-current-if-git",
             "workspace": str(WORKSPACE) if WORKSPACE else None,
             "index": str(index), "repositories": list(repos.values()), "worktrees": rows,
-            "repository_errors": errors, "deletion_authorized": False,
+            "repository_errors": errors, "unresolved_managed_paths": sorted(set(unresolved_paths)),
+            "deletion_authorized": False,
             "activity": "Session/process occupancy must be checked separately; commit/record age is not activity."}
 
 
@@ -525,7 +555,7 @@ def closeout(args, index):
                 or any(item["path"] == path for item in worktrees(repo["common_dir"])):
             raise Error("Git removal did not fully clear the path; preserve the task record")
         del data["worktrees"][path]
-        save_index(index, data)
+        save_json(index, data)
         return {**result, "cleanup": "closed", "blockers": [], "applied": True,
                 "record_forgotten": True}
 
@@ -543,11 +573,14 @@ def parser():
     cli.add_argument("--index", default=str(home / "state/worktrees.json"))
     sub = cli.add_subparsers(dest="command", required=True)
     sub.add_parser("init", help="Initialize the JoyStack global worktrees/state directories; preserves existing records")
-    for name in ("list", "cleanup-plan"):
-        command = sub.add_parser(name, help="Read-only inventory; cleanup-plan never removes anything")
-        command.add_argument("--repo", action="append", help="Restrict to these repositories (repeatable); default: known + current")
+    for name in ("list", "cleanup-plan", "scan"):
+        command = sub.add_parser(name, help="Inventory worktrees; scan saves a JSON snapshot, never removes anything")
+        command.add_argument("--repo", action="append", help="Restrict to these repositories (repeatable); default: known + managed root + current")
         command.add_argument("--json", action="store_true")
         command.add_argument("--review-days", type=int, default=7, help="Record-age review reminder, never a deletion deadline")
+        if name == "scan":
+            command.add_argument("--output", default=str(home / "state/worktree-inventory.json"),
+                                 help="Local JSON snapshot path; task records remain in worktrees.json")
     command = sub.add_parser("close", help="Preview or safely remove one registered, adopted worktree; retain its branch")
     command.add_argument("--path", required=True)
     command.add_argument("--apply", action="store_true")
@@ -556,6 +589,7 @@ def parser():
     for name in ("create", "register"):
         command = sub.add_parser(name)
         command.add_argument("--task", required=True)
+        command.add_argument("--reason", required=True, help="Why this task uses a separate worktree")
         command.add_argument("--session", required=True, help="Caller-supplied task/session identity, not inferred")
         command.add_argument("--target", required=True, help="Explicit adoption target ref; local cached refs only")
         command.add_argument("--cleanup-when", required=True)
@@ -571,7 +605,7 @@ def parser():
     command = sub.add_parser("update", help="Change task metadata, not Git state")
     command.add_argument("--path", required=True)
     command.add_argument("--state", choices=STATES)
-    for key in ("task", "session", "target", "cleanup-when", "keep-reason"):
+    for key in ("task", "reason", "session", "target", "cleanup-when", "keep-reason"):
         command.add_argument("--" + key)
     command = sub.add_parser("forget", help="Remove metadata only after native Git removal and path disappearance")
     command.add_argument("--path", required=True)
@@ -592,18 +626,23 @@ def main():
             with locked_index(index) as data:
                 (home / "worktrees").mkdir(mode=0o700, exist_ok=True)
                 if not index.exists():
-                    save_index(index, data)
+                    save_json(index, data)
             print(json.dumps({"home": str(home), "worktree_root": str(home / "worktrees"),
                               "index": str(index), "records": len(data["worktrees"])}))
             return 0
-        for key in ("task", "session", "target", "cleanup_when"):
+        for key in ("task", "reason", "session", "target", "cleanup_when"):
             value = getattr(args, key, None)
             if value is not None and not value.strip():
                 raise Error(f"--{key.replace('_', '-')} must not be empty")
-        if args.command in ("list", "cleanup-plan"):
+        if args.command in ("list", "cleanup-plan", "scan"):
             if args.review_days < 0:
                 raise Error("--review-days must be non-negative")
             result = inventory(args, index)
+            if args.command == "scan":
+                output = checked_path(args.output, "inventory snapshot")
+                output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+                save_json(output, {"version": 1, **result})
+                result["snapshot_path"] = str(output)
             if args.json:
                 print(json.dumps(result, indent=2, ensure_ascii=True))
             else:
@@ -614,7 +653,9 @@ def main():
                     print("\t".join(json.dumps(v, ensure_ascii=False)[1:-1] for v in values))
                 for error in result["repository_errors"]:
                     print(json.dumps(error), file=sys.stderr)
-                print("Scope: known/explicit repositories only. Candidates still require session/process and authorization checks.")
+                for path in result["unresolved_managed_paths"]:
+                    print("UNRESOLVED MANAGED PATH: " + path, file=sys.stderr)
+                print("Scope: known, managed-root, current, or explicit repositories. Candidates still require session/process and authorization checks.")
             return 1 if result["repository_errors"] else 0
         if args.command == "close":
             result = closeout(args, index)

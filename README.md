@@ -86,11 +86,12 @@ joy-test 是主栈的测试入口：承接测试策略、test-first、受影响�
 │   └── <repo>-<repository-id>/<task-slug>/
 └── state/
     ├── worktrees.json
+    ├── worktree-inventory.json
     └── worktrees.json.lock
 ```
 
 - 创建计划默认不写入；实际创建时登记任务、会话、基线、目标分支与清理条件。
-- 总览覆盖已登记或明确指定的仓库；未知用途、读取失败和未检查的占用分别说明。
+- 总览覆盖已登记、明确指定及 `.joystack/worktrees/<仓库名>-<仓库指纹>/<任务目录>` 内发现的仓库；JoyStack 创建时保证这个分组布局，旧平铺目录不主动发现。`scan` 将观察事实写入独立 JSON 快照，未知用途、未识别目录、读取失败和未检查的占用分别说明。
 - 旧目录与宿主管理的 worktree 不自动搬迁或认领；目录很久未使用只能触发复查。
 - 清理计划不删除目录。`close` 默认预览；核对成果采用、未保存文件、保留原因及会话/进程占用后，`close --apply --sessions-clear` 复查现场、移除目录并回读注销登记，保留分支。
 

@@ -1,6 +1,6 @@
 # Worktree 生命周期
 
-每个任务目录都要能回答：做什么、谁在用、成果往哪里合、为什么保留、何时退出。Git 负责仓库事实；本机台账只记录调用方确认的任务语义。使用 Git 和 Python 3.9+ 标准库，无第三方 CLI、后台服务或数据库依赖。
+每个任务目录都要能回答：做什么、为什么需要独立 worktree、谁在用、成果往哪里合、为什么保留、何时退出。Git 负责仓库事实；本机台账只记录调用方确认的任务语义。使用 Git 和 Python 3.9+ 标准库，无第三方 CLI、后台服务或数据库依赖。
 
 ## 入口与位置
 
@@ -9,7 +9,7 @@
 - 项目或用户明确指定的位置在平台权限内优先；默认自建目录使用当前环境家目录下 `.joystack/worktrees/<repo>-<repository-id>/<task-slug>`。家目录由环境解析，不从 cwd/工作区推断。repository-id 来自 Git common directory 指纹，避免同名仓库互撞；目录名体现任务语义。
 - 宿主目录保留宿主路径。已有散落目录先只读盘点，确认用途后登记；不批量搬家，不从名字、提交时间或相似 diff 推断归属。
 - 项目内位置须已被 Git 忽略；脚本检查，不自动修改或提交 `.gitignore`。Git metadata 目录不作为工作目录。
-- 台账在 `~/.joystack/state/worktrees.json`；统一根目录与安装边界见 JoyStack 全局目录（按技能名发现 `joy-stack`，再从其实际目录读取 `references/global-home.md`）。只存本机必要信息，不放进项目源码、附件或公开 Git，不记录凭据、完整会话或敏感业务正文。
+- 任务台账在 `~/.joystack/state/worktrees.json`，显式扫描快照在 `~/.joystack/state/worktree-inventory.json`；统一根目录与安装边界见 JoyStack 全局目录（按技能名发现 `joy-stack`，再从其实际目录读取 `references/global-home.md`）。只存本机必要信息，不放进项目源码、附件或公开 Git，不记录凭据、完整会话或敏感业务正文。
 
 ## 原生脚本
 
@@ -24,9 +24,12 @@
 ```bash
 python3 "$SKILL_DIR/scripts/worktrees.py" list --repo /path/to/repo --json
 python3 "$SKILL_DIR/scripts/worktrees.py" list --json
+python3 "$SKILL_DIR/scripts/worktrees.py" scan --json
 ```
 
-指定 `--repo` 时只查这些仓库，可重复该参数。未指定时查台账已知仓库与当前 Git 仓库，不扫描磁盘、宿主历史或所有项目；首次跨仓库盘点时显式传入获准仓库路径。报告覆盖范围及每个仓库的读取失败，失败不等于无 worktree。
+指定 `--repo` 时只查这些仓库，可重复该参数。未指定时查台账已知仓库、当前 Git 仓库，以及 `.joystack/worktrees/<repo>-<12位仓库指纹>/<task-slug>` 分组布局；不主动发现根目录下的旧平铺目录。对每个发现的 Git worktree 通过原生 Git 找到所属仓库并列出该仓库的全部 worktree，包括根目录外的关联目录。不扫描其他磁盘位置或宿主历史；首次盘点其他仓库时显式传入获准路径。非分组目录和分组下没有 `.git` 标记的目录单列为 `unresolved_managed_paths`，不能当作已清理。报告覆盖范围及读取失败，失败不等于无 worktree。
+
+`list` 和 `cleanup-plan` 只读。`scan` 执行同一盘点并原子写入版本化 JSON 快照，记录观察时间、覆盖范围、任务状态、Git 阻塞项及读取错误；不创建任务台账记录，也不替未知目录推断用途。再次扫描会更新快照。`--output` 可指定获准的本机快照路径。
 
 输出包含主 checkout、linked worktrees、detached HEAD、锁定/失效目录、用途与任务状态、未提交/未跟踪/忽略文件、进行中的 Git 操作、目标包含关系，以及可用的 upstream 差异。未登记目录显示用途未知，不能当空闲。台账存在而 Git 不再登记的目录单独提示，不自动 prune 或清除记录。
 
@@ -37,12 +40,12 @@ python3 "$SKILL_DIR/scripts/worktrees.py" list --json
 ```bash
 python3 "$SKILL_DIR/scripts/worktrees.py" create \
   --repo /path/to/repo --branch task/fix-search --slug fix-search \
-  --task '修复搜索结果' --session 'caller-task-id' \
+  --task '修复搜索结果' --reason '与主目录中的并行工作隔离' --session 'caller-task-id' \
   --base origin/main --target origin/main \
   --cleanup-when '成果进入目标分支，验收完成且没有会话或进程占用'
 ```
 
-默认只返回位置、分支、基线的创建计划，不创建目录或台账。按项目规则核对最新基线和创建权限后，同一命令增加 `--apply`，用 native `git worktree add` 创建并立即登记。调用方传入真实任务/会话标识和清理条件；无法获知宿主 session ID 时使用明确的本地任务标识，不编造宿主绑定。
+默认只返回位置、分支、基线与隔离理由的创建计划，不创建目录或台账。无论默认根目录还是 `--root` 覆盖，JoyStack 创建的路径始终在 `<repo>-<repository-id>/<task-slug>` 分组下。按项目规则核对最新基线和创建权限后，同一命令增加 `--apply`，用 native `git worktree add` 创建并立即登记。调用方分别填写任务用途 `--task` 与为什么需要独立目录的 `--reason`，并传入真实会话标识和清理条件；无法获知宿主 session ID 时使用明确的本地任务标识，不编造宿主绑定。
 
 脚本不安装依赖、不主动运行项目脚本、不推送；native Git 仍可能触发现有 hooks，沿用其配置而不绕过。add/hook 非零退出或超时时回查实际目录和 Git 登记：报告失败原因与路径存在事实，不声称本次创建，不自动登记；即使仓库、分支与 HEAD 均吻合，也不能证明创建来源。确认归属后由 Agent 显式 register，必要时 update 为 paused 并保留 setup 原因，避免重复创建或强删。成功 add 后也核对三项身份，吻合才登记；台账保存失败时报告创建已成功、登记失败，回查后恢复。台账锁只保护台账写入，不约束外部原生 Git 操作。
 
@@ -51,6 +54,7 @@ python3 "$SKILL_DIR/scripts/worktrees.py" create \
 ```bash
 python3 "$SKILL_DIR/scripts/worktrees.py" register \
   --path /path/to/existing-worktree --task '搜索修复待验收' \
+  --reason '保留独立验证环境' \
   --session 'caller-task-id' --target origin/main \
   --cleanup-when '合回并验收后清理'
 
@@ -58,7 +62,7 @@ python3 "$SKILL_DIR/scripts/worktrees.py" update \
   --path /path/to/existing-worktree --state verify --keep-reason '等待目标环境验收'
 ```
 
-register 只登记真实、完整的 linked worktree 根路径，不登记主 checkout、子目录或不存在的路径。采用已有目录时，创建时间与原始基线保持未知；确认了基线才传 `--base`，不从当前 HEAD 倒推历史。重复登记同一任务/会话/分支保留状态和保留原因；不同任务或会话不能由 register 覆盖，须核对占用和交接权限后显式 update，并明确传入新 `--state`，不继承旧任务完成状态。分支改变后先检查，再重新登记同一任务。
+register 只登记真实、完整的 linked worktree 根路径，不登记主 checkout、子目录或不存在的路径。采用已有目录时，创建时间与原始基线保持未知；确认了基线才传 `--base`，不从当前 HEAD 倒推历史。`--reason` 记录当前任务为什么使用独立目录，不推断旧目录最初的创建动机；旧台账缺此字段时显示“未记录”。重复登记同一任务/会话/分支保留状态、隔离理由和保留原因；不同任务或会话不能由 register 覆盖，须核对占用和交接权限后显式 update，并明确传入新 `--state`，不继承旧任务完成状态。分支改变后先检查，再重新登记同一任务。
 
 任务状态由调用方维护：`active` 进行中、`review` 待评审、`merge` 待合回、`verify` 保留验证、`paused` 暂缓、`done` 任务已结束。没有固定过期删除状态。done 不能替代实时 Git、PR、占用和成果采用证据；有保留原因时继续保留。更新后回读；续接或交付时给出下一步和清理条件。
 

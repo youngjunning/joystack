@@ -70,7 +70,8 @@ class WorktreeTests(unittest.TestCase):
         return path
 
     def register(self, path, target="main"):
-        return self.cli("register", "--path", path, "--task", "Fix search", "--session", "test-session",
+        return self.cli("register", "--path", path, "--task", "Fix search",
+                        "--reason", "Keep search changes isolated", "--session", "test-session",
                         "--target", target, "--cleanup-when", "adopted and no occupancy")
 
     def rows(self, *extra):
@@ -81,7 +82,8 @@ class WorktreeTests(unittest.TestCase):
 
     def create_args(self, branch="task/search", **overrides):
         values = {"repo": str(self.repo), "root": str(self.root / "managed"), "branch": branch,
-                  "task": "Fix search", "session": "test-session", "target": "main",
+                  "task": "Fix search", "reason": "Keep search changes isolated",
+                  "session": "test-session", "target": "main",
                   "cleanup-when": "adopted and no occupancy", **overrides}
         return ["create", *[item for key, value in values.items() for item in ("--" + key, value)]]
 
@@ -94,6 +96,43 @@ class WorktreeTests(unittest.TestCase):
         self.assertFalse(self.index.parent.exists())
         self.assertEqual(before, (self.repo / ".git/index").read_bytes())
 
+    def test_default_inventory_discovers_grouped_managed_worktrees(self):
+        managed = self.root / ".joystack" / "worktrees"
+        grouped = self.native(name="grouped", path=managed / ("repo-" + worktrees.repository(self.repo)["id"]) / "grouped-task")
+        other = self.root / "other-repo"
+        self.init_repo(other)
+        other_path = managed / ("other-repo-" + worktrees.repository(other)["id"]) / "other-task"
+        self.run_git(other, "worktree", "add", "-b", "other-task", str(other_path), "main")
+        flat_repo = self.root / "flat-only-repo"
+        self.init_repo(flat_repo)
+        flat = managed / "legacy-flat"
+        self.run_git(flat_repo, "worktree", "add", "-b", "flat-task", str(flat), "main")
+        unresolved = managed / "orphaned"
+        unresolved.mkdir(parents=True)
+        report = self.cli("list", "--json")
+        paths = {row["path"] for row in report["worktrees"]}
+        self.assertIn(str(grouped), paths)
+        self.assertIn(str(other_path), paths)
+        self.assertNotIn(str(flat), paths)
+        self.assertEqual(len(report["repositories"]), 2)
+        self.assertEqual(self.row(grouped)["state"], "unknown")
+        self.assertIn(str(unresolved), report["unresolved_managed_paths"])
+        self.assertEqual(report["coverage"], "known-repositories-plus-managed-root-and-current-if-git")
+        self.assertFalse(self.index.exists())
+
+    def test_scan_saves_observed_json_without_claiming_unknown_task(self):
+        managed = self.root / ".joystack" / "worktrees"
+        path = self.native(name="scan-task", path=managed / ("repo-" + worktrees.repository(self.repo)["id"]) / "scan-task")
+        report = self.cli("scan", "--json")
+        snapshot = Path(report["snapshot_path"])
+        saved = json.loads(snapshot.read_text())
+        row = next(item for item in saved["worktrees"] if item["path"] == str(path))
+        self.assertEqual(saved["version"], 1)
+        self.assertEqual(row["state"], "unknown")
+        self.assertIn("purpose-unknown", row["cleanup_blockers"])
+        self.assertFalse(self.index.exists())
+        self.assertEqual(snapshot.stat().st_mode & 0o777, 0o600)
+
     def test_create_plan_has_no_filesystem_or_git_side_effects(self):
         plan = self.cli(*self.create_args())
         self.assertFalse(plan["applied"])
@@ -101,6 +140,9 @@ class WorktreeTests(unittest.TestCase):
         self.assertFalse(self.index.parent.exists())
         self.assertEqual(len(worktrees.worktrees(self.repo)), 1)
         self.assertIn("Fix-search", plan["path"])
+        self.assertEqual(plan["reason"], "Keep search changes isolated")
+        self.assertEqual(Path(plan["path"]).parent.name,
+                         "repo-" + worktrees.repository(self.repo)["id"])
 
     def test_create_applies_and_registers_exact_base(self):
         plan = self.cli(*self.create_args(), "--apply")
@@ -109,6 +151,7 @@ class WorktreeTests(unittest.TestCase):
         self.assertEqual(self.run_git(path, "rev-parse", "HEAD"), plan["base_commit"])
         self.assertEqual(plan["record"]["base_commit"], plan["base_commit"])
         self.assertEqual(plan["record"]["source"], "joy-git")
+        self.assertEqual(plan["record"]["reason"], "Keep search changes isolated")
         self.assertIsNotNone(plan["record"]["created_at"])
         self.assertEqual(self.row(path)["task"], "Fix search")
         if os.name != "nt":
@@ -121,6 +164,7 @@ class WorktreeTests(unittest.TestCase):
         self.assertIsNone(record["created_at"])
         self.assertIsNone(record["base_commit"])
         self.assertEqual(record["source"], "adopted")
+        self.assertEqual(record["reason"], "Keep search changes isolated")
         self.assertEqual(before, self.run_git(path, "rev-parse", "HEAD"))
         self.assertTrue(path.exists())
 
@@ -137,7 +181,8 @@ class WorktreeTests(unittest.TestCase):
         path = self.native()
         (path / "sub").mkdir()
         for wrong in (self.repo, path / "sub"):
-            result = self.cli("register", "--path", wrong, "--task", "task", "--session", "session",
+            result = self.cli("register", "--path", wrong, "--task", "task",
+                              "--reason", "Isolate task", "--session", "session",
                               "--target", "main", "--cleanup-when", "done", ok=False)
             self.assertIn("exact linked worktree", result.stderr)
 
@@ -145,6 +190,18 @@ class WorktreeTests(unittest.TestCase):
         result = self.cli(*self.create_args(task="  "), "--apply", ok=False)
         self.assertIn("must not be empty", result.stderr)
         self.assertFalse(self.index.exists())
+
+    def test_creation_reason_is_required_and_legacy_records_remain_readable(self):
+        result = self.cli(*self.create_args(reason="  "), "--apply", ok=False)
+        self.assertIn("--reason must not be empty", result.stderr)
+        path = self.native()
+        self.register(path)
+        data = json.loads(self.index.read_text())
+        del data["worktrees"][str(path)]["reason"]
+        self.index.write_text(json.dumps(data))
+        row = self.row(path)
+        self.assertIsNone(row["reason"])
+        self.assertEqual(row["task"], "Fix search")
 
     def test_done_is_only_an_occupancy_review_candidate(self):
         path = self.native()
@@ -360,7 +417,7 @@ class WorktreeTests(unittest.TestCase):
 
     def test_git_creation_survives_index_save_failure(self):
         args = worktrees.parser().parse_args(self.create_args()[0:] + ["--apply"])
-        with patch.dict(os.environ, self.env), patch.object(worktrees, "save_index", side_effect=OSError("disk full")):
+        with patch.dict(os.environ, self.env), patch.object(worktrees, "save_json", side_effect=OSError("disk full")):
             with self.assertRaisesRegex(worktrees.Error, "Worktree created.*registration failed"):
                 worktrees.create(args, self.index)
         self.assertEqual(len(worktrees.worktrees(self.repo)), 2)
@@ -371,7 +428,8 @@ class WorktreeTests(unittest.TestCase):
         self.register(path)
         self.cli("update", "--path", path, "--state", "done")
         before = self.index.read_bytes()
-        result = self.cli("register", "--path", path, "--task", "New task", "--session", "new-session",
+        result = self.cli("register", "--path", path, "--task", "New task",
+                          "--reason", "Isolate new task", "--session", "new-session",
                           "--target", "main", "--cleanup-when", "done", ok=False)
         self.assertIn("ownership changed", result.stderr)
         self.assertEqual(self.index.read_bytes(), before)
@@ -594,7 +652,8 @@ class WorktreeTests(unittest.TestCase):
         scope.mkdir()
         path = self.native(path=scope / "linked")
         before = (self.repo / ".git/index").read_bytes()
-        result = self.restricted("register", "--path", path, "--task", "task", "--session", "session",
+        result = self.restricted("register", "--path", path, "--task", "task",
+                                 "--reason", "Isolate task", "--session", "session",
                                  "--target", "main", "--cleanup-when", "done", cwd=path,
                                  env={"JOYSTACK_WORKSPACE": str(scope), "JOYSTACK_HOME": str(scope / ".joystack")},
                                  index=scope / "state/index.json", ok=False)

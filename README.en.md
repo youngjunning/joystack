@@ -85,11 +85,12 @@ Persistent runtime data defaults to **`.joystack` under the user home directory 
 │   └── <repo>-<repository-id>/<task-slug>/
 └── state/
     ├── worktrees.json
+    ├── worktree-inventory.json
     └── worktrees.json.lock
 ```
 
 - Creation plans do not write by default. Actual creation records the task, session, base commit, target branch, and cleanup conditions.
-- The inventory covers registered or explicitly selected repositories. Unknown purposes, read failures, and unchecked occupancy are reported separately.
+- The inventory covers registered or explicitly selected repositories and the grouped layout under `.joystack/worktrees`. It does not discover legacy flat folders. `scan` saves observed facts in a separate JSON snapshot; unknown purposes, unresolved folders, read failures, and unchecked occupancy remain explicit.
 - Existing directories and host-managed worktrees are not automatically moved or claimed. Age alone can prompt review, not deletion.
 - Cleanup plans do not delete directories. Actual cleanup requires checks for adopted work, unsaved files, retention reasons, active sessions and processes, and valid authorization.
 
