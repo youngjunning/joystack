@@ -75,7 +75,7 @@ See the [suite contract](skills/engineering/joy-stack/references/stack-contract.
 
 ## Worktree management
 
-`joy-git` covers creation, purpose registration, continuation, and cleanup decisions as one task-directory lifecycle. Its helper uses native Git and the Python 3.9+ standard library, with no Worktrunk dependency.
+`joy-git` covers creation, purpose registration, continuation, and cleanup decisions as one task-directory lifecycle. Its helper uses native Git and the Python 3.9+ standard library.
 
 Persistent runtime data defaults to **`.joystack` under the user home directory resolved by the current environment**. The environment determines home; it is not a hard-coded account path or inferred from the working directory or workspace.
 
