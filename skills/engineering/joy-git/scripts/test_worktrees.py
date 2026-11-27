@@ -177,6 +177,23 @@ class WorktreeTests(unittest.TestCase):
         self.assertEqual(new["state"], "verify")
         self.assertEqual(new["keep_reason"], "device validation")
 
+    def test_adoption_can_record_reviewed_initial_state(self):
+        path = self.native()
+        stale = self.cli("register", "--path", path, "--task", "Verify release",
+                         "--reason", "Keep validation isolated", "--session", "owlet-manual-test",
+                         "--target", "main", "--cleanup-when", "After validation",
+                         "--expected-head", "0" * 40, ok=False)
+        self.assertIn("HEAD changed since", stale.stderr)
+        self.assertFalse(self.index.exists())
+        record = self.cli("register", "--path", path, "--task", "Verify release",
+                          "--reason", "Keep validation isolated", "--session", "owlet-manual-test",
+                          "--target", "main", "--cleanup-when", "After validation",
+                          "--state", "verify", "--keep-reason", "Awaiting device review",
+                          "--expected-head", self.run_git(path, "rev-parse", "HEAD"))
+        self.assertEqual(record["state"], "verify")
+        self.assertEqual(record["keep_reason"], "Awaiting device review")
+        self.assertEqual(self.row(path)["reason"], "Keep validation isolated")
+
     def test_primary_and_subdirectory_cannot_be_registered(self):
         path = self.native()
         (path / "sub").mkdir()
@@ -219,12 +236,27 @@ class WorktreeTests(unittest.TestCase):
         self.cli("update", "--path", path, "--state", "done")
         preview = self.cli("close", "--path", path)
         self.assertEqual(preview["cleanup"], "needs-occupancy-review")
+        self.assertEqual(preview["task"], "Fix search")
+        self.assertEqual(preview["session"], "test-session")
         self.assertFalse(preview["applied"])
+        self.assertEqual(preview["head"], self.run_git(path, "rev-parse", "HEAD"))
+        self.assertEqual(preview["target_commit"], self.run_git(self.repo, "rev-parse", "main"))
+        self.assertTrue(path.exists())
+        stale = self.cli("close", "--path", path, "--apply", "--sessions-clear",
+                         "--expected-head", "0" * 40, ok=False)
+        self.assertIn("changed since the reviewed", stale.stderr)
+        self.assertTrue(path.exists())
+        wrong_owner = self.cli("close", "--path", path, "--apply", "--sessions-clear",
+                               "--expected-task", "Another task", ok=False)
+        self.assertIn("changed since the reviewed", wrong_owner.stderr)
         self.assertTrue(path.exists())
         denied = self.cli("close", "--path", path, "--apply", ok=False)
         self.assertIn("--sessions-clear", denied.stderr)
         with patch.object(worktrees, "occupied_cwd", return_value=False):
-            result = self.cli("close", "--path", path, "--apply", "--sessions-clear")
+            result = self.cli("close", "--path", path, "--apply", "--sessions-clear",
+                              "--expected-head", preview["head"],
+                              "--expected-target-commit", preview["target_commit"],
+                              "--expected-task", preview["task"], "--expected-session", preview["session"])
         self.assertTrue(result["applied"])
         self.assertTrue(result["branch_retained"])
         self.assertFalse(path.exists())

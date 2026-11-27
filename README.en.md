@@ -92,7 +92,7 @@ Persistent runtime data defaults to **`.joystack` under the user home directory 
 - Creation plans do not write by default. Actual creation records the task, session, base commit, target branch, and cleanup conditions.
 - The inventory covers registered or explicitly selected repositories and the grouped layout under `.joystack/worktrees`. It does not discover legacy flat folders. `scan` saves observed facts in a separate JSON snapshot; unknown purposes, unresolved folders, read failures, and unchecked occupancy remain explicit.
 - Existing directories and host-managed worktrees are not automatically moved or claimed. Age alone can prompt review, not deletion.
-- Cleanup plans do not delete directories. Actual cleanup requires checks for adopted work, unsaved files, retention reasons, active sessions and processes, and valid authorization.
+- Cleanup plans do not delete directories. A desktop UI can claim, update, and preview through this CLI without editing the ledger itself. Actual cleanup rechecks the reviewed HEAD and target commit, adopted work, unsaved files, retention reasons, and active sessions and processes.
 
 An explicit `JOYSTACK_HOME` configuration can override the data root. Restricted platforms supply an allowed path boundary through `JOYSTACK_WORKSPACE` or `--workspace`. That boundary does not redefine home: an incompatible default location must be reported rather than silently relocated to the working directory. Path checks do not replace the platform sandbox or exempt native side effects such as Git hooks.
 

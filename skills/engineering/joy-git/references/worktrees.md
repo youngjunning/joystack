@@ -55,7 +55,7 @@ python3 "$SKILL_DIR/scripts/worktrees.py" create \
 python3 "$SKILL_DIR/scripts/worktrees.py" register \
   --path /path/to/existing-worktree --task '搜索修复待验收' \
   --reason '保留独立验证环境' \
-  --session 'caller-task-id' --target origin/main \
+  --session 'caller-task-id' --state verify --target origin/main \
   --cleanup-when '合回并验收后清理'
 
 python3 "$SKILL_DIR/scripts/worktrees.py" update \
@@ -63,6 +63,8 @@ python3 "$SKILL_DIR/scripts/worktrees.py" update \
 ```
 
 register 只登记真实、完整的 linked worktree 根路径，不登记主 checkout、子目录或不存在的路径。采用已有目录时，创建时间与原始基线保持未知；确认了基线才传 `--base`，不从当前 HEAD 倒推历史。`--reason` 记录当前任务为什么使用独立目录，不推断旧目录最初的创建动机；旧台账缺此字段时显示“未记录”。重复登记同一任务/会话/分支保留状态、隔离理由和保留原因；不同任务或会话不能由 register 覆盖，须核对占用和交接权限后显式 update，并明确传入新 `--state`，不继承旧任务完成状态。分支改变后先检查，再重新登记同一任务。
+
+桌面管理界面可把用户确认的任务信息交给本脚本：未登记目录用 `register --state` 一次写入，已登记目录用 `update`；两者可传 `--expected-head` 防止界面观察后 HEAD 改变。界面应回读台账，不能自行改写 JSON 或把 Git 状态推断成创建原因。无法获得真实宿主会话 ID 时，使用明确标注为手工管理的本地任务标识，不冒充宿主会话。
 
 任务状态由调用方维护：`active` 进行中、`review` 待评审、`merge` 待合回、`verify` 保留验证、`paused` 暂缓、`done` 任务已结束。没有固定过期删除状态。done 不能替代实时 Git、PR、占用和成果采用证据；有保留原因时继续保留。更新后回读；续接或交付时给出下一步和清理条件。
 
@@ -79,7 +81,7 @@ python3 "$SKILL_DIR/scripts/worktrees.py" cleanup-plan --repo /path/to/repo --js
 1. **对象与权限。** 明确路径、分支、任务和目标。主 checkout、bare repo 与用途未知目录保留；已有他人/宿主资源按明确认领和清理授权处理。
 2. **成果采用。** 依据最新目标 ref 和已完成的 PR/merge 证据，确认成果进入实际目标，原工作分支已接回或有明确可恢复采用路径。推送任务分支不等于合回。squash/rebase 使祖先检查不通过时单独核对采用映射；脚本保守阻塞，不自动作内容等价判断或强删。
 3. **现场与占用。** 回读 staged、unstaged、untracked、ignored、子模块与 Git 操作。忽略文件可能是缓存，也可能是凭据或资料，需逐项确认可丢弃。用当前宿主可用的任务/会话接口及系统进程信息查占用；无接口或无法确定时保留，不能用不存在锁、目录干净或提交很旧替代。当前执行目录先切换到保留的 checkout，不自动终止进程。
-4. **执行与回读。** 在保留的 checkout 执行 `close --path /path/to/worktree` 预览；完成上面的人工作业/会话核对后增加 `--apply --sessions-clear`。命令在台账锁内重新检查状态、Git 事实、目标包含关系及进程 cwd，占用或事实变化即拒绝；使用不带 `--force` 的原生 `git worktree remove`，回读目录和 Git 登记均消失后才注销台账。`--sessions-clear` 是调用方已核对会话及非 cwd 进程的声明，不能用来跳过检查。失败时保留记录和分支，逐项排查，不升级删除力度。旧的手工移除流程仍可用 `forget --path ...` 单独注销已不存在的目录。
+4. **执行与回读。** 在保留的 checkout 执行 `close --path /path/to/worktree` 预览；结果返回所见 HEAD、目标 commit、任务和会话标识。完成上面的人工作业/会话核对后增加 `--apply --sessions-clear`，并传入预览对应的 `--expected-head`、`--expected-target-commit`、`--expected-task` 与 `--expected-session`。命令在台账锁内重新检查状态、Git 事实、目标包含关系、任务归属及进程 cwd，占用或事实变化即拒绝；使用不带 `--force` 的原生 `git worktree remove`，回读目录和 Git 登记均消失后才注销台账。`--sessions-clear` 是调用方已核对会话及非 cwd 进程的声明，不能用来跳过检查。失败时保留记录和分支，逐项排查，不升级删除力度。旧的手工移除流程仍可用 `forget --path ...` 单独注销已不存在的目录。
 
 本地分支是另一对象：开放 PR、尚未采用提交或唯一恢复入口仍需保留；只有已采用且不再被任何 worktree/任务使用时，按授权单独安全删除本地分支。没有远端分支删除授权。`git worktree prune` 仅清理失效 metadata，不清理目录；用途不明、锁定或外接盘暂不可用时不自动 prune。手工移动导致登记不一致时先检查原路径与宿主状态，按 Git repair 流程恢复，不把“不见了”当“已清理”。
 

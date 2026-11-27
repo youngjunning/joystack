@@ -69,7 +69,7 @@
     "name": "joy-git",
     "category": "engineering",
     "path": "skills/engineering/joy-git",
-    "summary": "按平台授权交付，盘点分组 worktree 并保存 JSON 快照，闭环管理任务登记、核对与关闭"
+    "summary": "按平台授权交付，盘点分组 worktree；通过 CLI 维护任务台账、预览并安全关闭工作树"
   },
   {
     "name": "joy-continue",

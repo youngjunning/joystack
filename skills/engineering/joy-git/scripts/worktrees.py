@@ -240,8 +240,9 @@ def remember(data, repo, row, args, created=False):
              "path": row["path"], "branch": row.get("branch"), "task": args.task,
              "reason": old.get("reason") or args.reason,
              "session": args.session, "target": args.target, "cleanup_when": args.cleanup_when,
-             "state": old.get("state", "active") if old.get("branch") == row.get("branch") else "active",
-             "keep_reason": old.get("keep_reason", ""), "updated_at": now(),
+             "state": old.get("state", getattr(args, "state", "active"))
+             if old.get("branch") == row.get("branch") else getattr(args, "state", "active"),
+             "keep_reason": old.get("keep_reason", getattr(args, "keep_reason", "")), "updated_at": now(),
              "registered_at": old.get("registered_at", now()),
              "created_at": old.get("created_at", now() if created else None),
              "source": old.get("source", "joy-git" if created else "adopted")}
@@ -336,6 +337,8 @@ def mutate(args, index):
             result = {"forgotten": path, "worktree_deleted": False}
         else:
             repo, row = actual_worktree(path)
+            if args.expected_head and row["head"] != args.expected_head:
+                raise Error("Worktree HEAD changed since the reviewed task record")
             if args.command == "register":
                 revision(repo["common_dir"], args.target)
                 result = remember(data, repo, row, args)
@@ -531,7 +534,9 @@ def closeout(args, index):
     def plan(data):
         repo, entry, row = closeout_snapshot(data, path)
         return repo, entry, row, {"path": path, "branch": row.get("branch"),
-                                  "target": entry["target"], "cleanup": row["cleanup"],
+                                  "head": row["head"], "task": entry["task"],
+                                  "session": entry["session"], "target": entry["target"],
+                                  "target_commit": row.get("target_commit"), "cleanup": row["cleanup"],
                                   "blockers": row["cleanup_blockers"], "applied": False,
                                   "branch_retained": True}
 
@@ -541,6 +546,11 @@ def closeout(args, index):
         raise Error("--sessions-clear is required after checking caller sessions and other process use")
     with locked_index(index) as data:
         repo, entry, row, result = plan(data)
+        if (args.expected_head and row["head"] != args.expected_head) or (
+                args.expected_target_commit and row.get("target_commit") != args.expected_target_commit) or (
+                args.expected_task and entry["task"] != args.expected_task) or (
+                args.expected_session and entry["session"] != args.expected_session):
+            raise Error("Worktree or target changed since the reviewed closeout plan")
         if row["cleanup"] != "needs-occupancy-review":
             raise Error("Closeout blocked: " + ", ".join(row["cleanup_blockers"]))
         if Path.cwd().resolve().is_relative_to(Path(path)) or occupied_cwd(path):
@@ -586,6 +596,10 @@ def parser():
     command.add_argument("--apply", action="store_true")
     command.add_argument("--sessions-clear", action="store_true",
                          help="Caller reviewed task sessions and non-cwd process use; required with --apply")
+    command.add_argument("--expected-head", help="Reject if HEAD changed since the reviewed plan")
+    command.add_argument("--expected-target-commit", help="Reject if target changed since the reviewed plan")
+    command.add_argument("--expected-task", help="Reject if task ownership changed since the reviewed plan")
+    command.add_argument("--expected-session", help="Reject if session ownership changed since the reviewed plan")
     for name in ("create", "register"):
         command = sub.add_parser(name)
         command.add_argument("--task", required=True)
@@ -602,9 +616,14 @@ def parser():
             command.add_argument("--apply", action="store_true", help="Create and register; otherwise only print the plan")
         else:
             command.add_argument("--path", required=True)
+            command.add_argument("--state", choices=STATES, default="active",
+                                 help="Initial state when adopting a new worktree")
+            command.add_argument("--keep-reason", default="", help="Current reason to retain the adopted worktree")
+            command.add_argument("--expected-head", help="Reject if HEAD changed since review")
     command = sub.add_parser("update", help="Change task metadata, not Git state")
     command.add_argument("--path", required=True)
     command.add_argument("--state", choices=STATES)
+    command.add_argument("--expected-head", help="Reject if HEAD changed since review")
     for key in ("task", "reason", "session", "target", "cleanup-when", "keep-reason"):
         command.add_argument("--" + key)
     command = sub.add_parser("forget", help="Remove metadata only after native Git removal and path disappearance")
